@@ -1,0 +1,29 @@
+{
+  "name": "vue-note",
+  "version": "1.0.0",
+  "description": "vue源码阅读笔记",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@yyhaxx2108.github.com:yyhaxx2108/vue-note.git"
+  },
+  "keywords": [
+    "vue源码"
+  ],
+  "author": "yyhaxx",
+  "license": "ISC",
+  "devDependencies": {
+    "cz-conventional-changelog": "^2.1.0",
+    "vuepress": "^0.14.8"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
