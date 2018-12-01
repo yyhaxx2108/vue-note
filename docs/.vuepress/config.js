@@ -53,9 +53,19 @@ module.exports = {
               }
             ]
           },
-          {
+             {
             text: 'WEEX',
-            link: '/platforms/weex/'
+            link: '/platforms/weex/',
+            items: [
+              {
+                text: 'compiler',
+                link: '/platforms/weex/compiler/',
+              },
+              {
+                text: 'runtime',
+                link: '/platforms/weex/runtime/'
+              }
+            ]
           },
         ],
       },
@@ -92,6 +102,27 @@ module.exports = {
           ]
         }
       ],
+      '/platforms/weex/compiler/': [
+        '',
+        {
+          title: 'directives',
+          children: [
+            'directives/',
+            'directives/model'
+          ]
+        },
+        {
+          title: 'modules',
+          children: [
+            'modules/',
+            // 'modules/recycle-list',
+            'modules/append',
+            'modules/class',
+            'modules/props',
+            'modules/style'
+          ]
+        }
+      ]
     }
   }
 }
