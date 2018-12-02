@@ -50,6 +50,8 @@ async function jsFileToMdFile(inputPath, outputPath, excludeDirs){
   // 转换为绝对路径
   if(inputPath.indexOf('/') !== 0){
     inputPath = path.join(__dirname, inputPath)
+  }
+  if(outputPath.indexOf('/') !== 0){
     outputPath = path.join(__dirname, outputPath)
   }
   // 判断路径是否存在，并且进行处理
