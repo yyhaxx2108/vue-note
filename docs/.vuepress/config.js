@@ -28,35 +28,35 @@ module.exports = {
         "directives", 
         "ref"
       ],
-      "/docs1/compiler/codegen/": [
+      "/compiler/codegen/": [
         "",
         "events"
       ],
-      "/docs1/compiler/directives/": [
+      "/compiler/directives/": [
         "", 
         "bind", 
         "model", 
         "on"
       ],
-      "/docs1/compiler/parser/": [
+      "/compiler/parser/": [
         "", 
         "entity-decoder", 
         "filter-parser", 
         "html-parser", 
         "text-parser"
       ],
-      "/docs1/core/components/": [
+      "/core/components/": [
         "", 
         "keep-alive"
       ],
-      "/docs1/core/global-api/": [
+      "/core/global-api/": [
         "", 
         "assets", 
         "extend", 
         "mixin", 
         "use"
       ],
-      "/docs1/core/instance/": [
+      "/core/instance/": [
         "", 
         "events", 
         "init", 
@@ -80,7 +80,7 @@ module.exports = {
           ]
         }
       ],
-      "/docs1/core/observer/": [
+      "/core/observer/": [
         "", 
         "array", 
         "dep", 
@@ -88,7 +88,7 @@ module.exports = {
         "traverse", 
         "watcher"
       ],
-      "/docs1/core/util/": [
+      "/core/util/": [
         "", 
         "debug", 
         "env", 
@@ -99,7 +99,7 @@ module.exports = {
         "perf", 
         "props"
       ],
-      "/docs1/core/vdom/": [
+      "/core/vdom/": [
         "create-component", 
         "create-element", 
         "create-functional-component",
@@ -127,7 +127,7 @@ module.exports = {
           ]
         }
       ],
-      "/docs1/platforms/web/": [
+      "/platforms/web/": [
         "entry-compiler", 
         "entry-runtime-with-compiler", 
         "entry-runtime", 
@@ -170,7 +170,7 @@ module.exports = {
           ]
         }
       ],
-      "/docs1/platforms/weex/": [
+      "/platforms/weex/": [
         "entry-compiler", 
         "entry-framework", 
         "entry-runtime-factory", 
@@ -198,25 +198,25 @@ module.exports = {
           ]
         }
       ],
-      "/docs1/server/bundle-renderer/": [
+      "/server/bundle-renderer/": [
         "create-bundle-renderer", 
         "create-bundle-runner", 
         "source-map-support"
       ],
-      "/docs1/server/optimizing-compiler/": [
+      "/server/optimizing-compiler/": [
         "", 
         "codegen", 
         "modules", 
         "optimizer", 
         "runtime-helpers"
       ],
-      "/docs1/server/template-renderer/": [
+      "/server/template-renderer/": [
         "", 
         "create-async-file-mapper", 
         "parse-template", 
         "template-stream"
       ],
-      "/docs1/server/webpack-plugin/": [
+      "/server/webpack-plugin/": [
         "client", 
         "server", 
         "util"
@@ -691,7 +691,7 @@ module.exports = {
           }, 
         ]
       },
-      
+
       {
         "text": "CORE",
         "link": "/core/",
