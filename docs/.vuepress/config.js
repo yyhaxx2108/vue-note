@@ -372,9 +372,19 @@ module.exports = {
         "", 
         "element", 
         "parser"
+      ],
+
+      "/life/": [
+        "chapter1",
+        "chapter2"
       ]
     },
     nav: [
+      {
+        "text": "Vue的一生",
+        "link": "/life/"
+      },
+
       {
         "text": "SFC",
         "link": "/sfc/",
@@ -893,7 +903,7 @@ module.exports = {
             ]
           }
         ]
-      }, 
+      } 
     ]
   }
 }
