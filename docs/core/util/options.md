@@ -2,23 +2,23 @@
 
 ```javascript
 /**
- * Option overwriting strategies are functions that handle
- * how to merge a parent option value and a child option
- * value into the final value.
+ * 这个文件的主要作用是将父组件配置和子组件配置合并到一起并返回
  */
+
+// 此时strats是空对象
 const strats = config.optionMergeStrategies
 
-/**
- * Options with restrictions
- */
+// 非生产环境中，el、propsData将采用默认合并选项
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
+    // 如果 vm 不存在，报警告：key属性用在vm实例上，子组件中不存在vm
     if (!vm) {
       warn(
         `option "${key}" can only be used during instance ` +
         'creation with the `new` keyword.'
       )
     }
+    // 此为默认合并策略，即如果子组件选项存在则返回子组件选项，否则返回父组件选项，这个合并策略其实是个函数
     return defaultStrat(parent, child)
   }
 }

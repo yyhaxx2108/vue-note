@@ -103,16 +103,21 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   }
 }
 
+// 解析constructor上的options属性
 export function resolveConstructorOptions (Ctor: Class<Component>) {
+  // 此时options拥有共有的 components、directives、filters、_base
   let options = Ctor.options
+  // 如果存在 Ctor.super 说明 Ctor 是 Vue.extend构建的子类
   if (Ctor.super) {
+    // 递归调用，继续查找 Ctor.super 的父类的options并且赋值给superOptions
     const superOptions = resolveConstructorOptions(Ctor.super)
+    // 将自身的 superOptions 缓存在 cachedSuperOptions
     const cachedSuperOptions = Ctor.superOptions
+    // 比较这两个变量的值,不等则说明"父类"的options改变过了，例如使用了Vue.mixin等
     if (superOptions !== cachedSuperOptions) {
-      // super option changed,
-      // need to resolve new options.
+      // 更新自身 superOptions 为 superOptions
       Ctor.superOptions = superOptions
-      // check if there are any late-modified/attached options (#4976)
+      // 检查是否有后期修改/附加选项，这个主要是解决注入选项丢失的问题(#4976)
       const modifiedOptions = resolveModifiedOptions(Ctor)
       // update base extend options
       if (modifiedOptions) {
@@ -128,9 +133,13 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
 }
 
 function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
+  // 定义modified变量
   let modified
+  // 自身新增的 options
   const latest = Ctor.options
+  // 当前构造器新增的 options
   const extended = Ctor.extendOptions
+  // 当前构造器新增并且封装好的options
   const sealed = Ctor.sealedOptions
   for (const key in latest) {
     if (latest[key] !== sealed[key]) {
@@ -142,14 +151,14 @@ function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
 }
 
 function dedupe (latest, extended, sealed) {
-  // compare latest and sealed to ensure lifecycle hooks won't be duplicated
-  // between merges
+  // 防止生命周期构造函数重复，如果latest不是数组则不用操作，否则进行去重
+  // last 一般存放的是生命周期钩子函数
   if (Array.isArray(latest)) {
     const res = []
     sealed = Array.isArray(sealed) ? sealed : [sealed]
     extended = Array.isArray(extended) ? extended : [extended]
     for (let i = 0; i < latest.length; i++) {
-      // push original options and not sealed options to exclude duplicated options
+      // 在 extended 中有 或者 sealed 中 没有，则推入返回数组中
       if (extended.indexOf(latest[i]) >= 0 || sealed.indexOf(latest[i]) < 0) {
         res.push(latest[i])
       }

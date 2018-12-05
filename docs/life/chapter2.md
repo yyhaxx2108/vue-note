@@ -76,4 +76,8 @@ merge options 分为两种情况，第一种是内部组件，第二种是其它
   }
 ```
 #### 非内部组件
-对于非内部组件，生成$options会调用 mergeOptions 方法, 该方法位于[～/vue/src/core/util/options.js](../..//core/util/options.html)中。
+对于非内部组件，生成$options会调用 mergeOptions 方法, 该方法位于[～/vue/src/core/util/options.js](../../core/util/options.html)中。此方法将传递三个参数，其中第二个是实例传入的options，第三个参数是当前实例vm。而第一个参数是
+```javascript
+resolveConstructorOptions(vm.constructor)
+```
+这个方法是来解析constructor上的options属性，并且将之返回。
