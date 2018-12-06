@@ -1,5 +1,7 @@
 # index
 
+当非生产环境中直接调用构造函数时会发出警告
+
 ```javascript
   import { initMixin } from './init'
   import { stateMixin } from './state'
@@ -9,7 +11,7 @@
   import { warn } from '../util/index'
 
   function Vue (options) {
-    // 当生产环境中直接调用构造函数时会发出警告
+    // 当非生产环境中直接调用构造函数时会发出警告
     if (process.env.NODE_ENV !== 'production' &&
       !(this instanceof Vue)
     ) {

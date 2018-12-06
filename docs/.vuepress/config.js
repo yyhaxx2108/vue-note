@@ -377,12 +377,21 @@ module.exports = {
       "/life/": [
         "chapter1",
         "chapter2"
+      ],
+      
+      "/note/": [
+        "chapter1"
       ]
     },
     nav: [
+      // {
+      //   "text": "Vue的一生",
+      //   "link": "/life/"
+      // },
+
       {
-        "text": "Vue的一生",
-        "link": "/life/"
+        "text": "笔记整理",
+        "link": "/note/"
       },
 
       {
