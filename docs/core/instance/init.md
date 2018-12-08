@@ -14,6 +14,7 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+  // 在 原型上 挂载 _init 方法，此方法在 new Vue() 时执行
   Vue.prototype._init = function (options?: Object) {
     // 缓存自身的实例
     const vm: Component = this

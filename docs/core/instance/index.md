@@ -3,15 +3,9 @@
 当非生产环境中直接调用构造函数时会发出警告
 
 ```javascript
-  import { initMixin } from './init'
-  import { stateMixin } from './state'
-  import { renderMixin } from './render'
-  import { eventsMixin } from './events'
-  import { lifecycleMixin } from './lifecycle'
-  import { warn } from '../util/index'
 
   function Vue (options) {
-    // 当非生产环境中直接调用构造函数时会发出警告
+    // 当非生产环境中直接调用构造函数时会发出警告，this instanceof Vue 判断 this 是否为Vue的实例
     if (process.env.NODE_ENV !== 'production' &&
       !(this instanceof Vue)
     ) {
