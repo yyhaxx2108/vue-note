@@ -34,15 +34,13 @@ if (inBrowser) {
   } catch (e) {}
 }
 
-// this needs to be lazy-evaled because vue may be required before
-// vue-server-renderer can set VUE_ENV
+// 这个需求需要延迟加载, 因为在 vue服务器渲染设置VUE_ENV环境之前, 需要先加载vue
 let _isServer
-// 判读是否为服务端渲染
+// 判读是否为服务端渲染，并且将结果缓存到 _isServer 中，提升性能
 export const isServerRendering = () => {
   if (_isServer === undefined) {
     if (!inBrowser && !inWeex && typeof global !== 'undefined') {
-      // detect presence of vue-server-renderer and avoid
-      // Webpack shimming the process
+      // 检测 vue的服务器渲染是否存在, 而且避免webpack去填充process
       _isServer = global['process'] && global['process'].env.VUE_ENV === 'server'
     } else {
       _isServer = false

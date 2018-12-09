@@ -20,11 +20,12 @@ Object.defineProperty(Vue.prototype, '$ssrContext', {
   }
 })
 
-// expose FunctionalRenderContext for ssr runtime helper installation
+// 在 Vue上 定义FunctionalRenderContext静态属性（与ssr相关）
 Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 })
 
+// 当前 Vue 的版本值，最终会被 rollup 插件替换成 process.env.VERSION || require('../package.json').version
 Vue.version = '__VERSION__'
 
 export default Vue
