@@ -96,6 +96,7 @@ export function toNumber (val: string): number | string {
  * Make a map and return a function for checking if a key
  * is in that map.
  */
+// 先根据一个字符串生成一个 map，然后根据该 map 产生一个新函数，新函数接收一个字符串参数作为 key，如果这个 key 在 map 中则返回 true，否则返回 undefined
 export function makeMap (
   str: string,
   expectsLowerCase?: boolean

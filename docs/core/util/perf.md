@@ -1,5 +1,11 @@
 # perf
 
+性能追踪，以下四个场景中用到
+1. 组件初始化(component init)
+2. 编译(compile)，将模板(template)编译成渲染函数
+3. 渲染(render)，其实就是渲染函数的性能，或者说渲染函数执行且生成虚拟DOM(vnode)的性能
+4. 打补丁(patch)，将虚拟DOM渲染为真实DOM的性能
+
 ```javascript
   // 判断是否为浏览器环境
   const perf = inBrowser && window.performance

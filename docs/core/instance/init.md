@@ -18,7 +18,7 @@ export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     // 缓存自身的实例
     const vm: Component = this
-    // 给实例自身加上一个唯一标记uid
+    // 给实例自身加上一个唯一标记uid, 且保存到内存
     vm._uid = uid++ 
 
     // 性能测量相关
@@ -30,7 +30,7 @@ export function initMixin (Vue: Class<Component>) {
       mark(startTag)
     }
 
-    // 将改实例_isVue设置为true，避免被观测(observed)
+    // 将改实例_isVue设置为true，即当一个对象拥有 _isVue时，代表该对象为Vue实例 避免被观测(observed)
     vm._isVue = true
     // 合并options
     if (options && options._isComponent) {
@@ -104,7 +104,7 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   }
 }
 
-// 解析constructor上的options属性
+// 解析constructor上的options属性, constructor可以是 Vue 也可以示 Vue.extend 扩展的构造函数
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   // 此时options拥有共有的 components、directives、filters、_base
   let options = Ctor.options
@@ -130,6 +130,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       }
     }
   }
+  // 该函数返回值是 Ctor.options
   return options
 }
 
