@@ -228,15 +228,15 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
     : childVal
 }
 
-/**
- * Validate component names
- */
+// 检查components子组件的命名是否规范
 function checkComponents (options: Object) {
   for (const key in options.components) {
     validateComponentName(key)
   }
 }
 
+// 1.组件的名字要满足正则表达式：/^[a-zA-Z][\w-]*$/
+// 要满足：条件 isBuiltInTag(name) || config.isReservedTag(name) 不成立
 export function validateComponentName (name: string) {
   if (!/^[a-zA-Z][\w-]*$/.test(name)) {
     warn(
@@ -245,6 +245,8 @@ export function validateComponentName (name: string) {
       'and must start with a letter.'
     )
   }
+  // isBuiltInTag判断是否为内置的标签，即 slot 或 component
+  // config.isReservedTag判断是否为，即原生html标签，或者svg标签
   if (isBuiltInTag(name) || config.isReservedTag(name)) {
     warn(
       'Do not use built-in or reserved HTML elements as component ' +
@@ -253,27 +255,30 @@ export function validateComponentName (name: string) {
   }
 }
 
-/**
- * Ensure all props option syntax are normalized into the
- * Object-based format.
- */
+// 将所有的 props 都规范化成为 Object-based 形式 即 props: {aaBb: {type: null}}
 function normalizeProps (options: Object, vm: ?Component) {
+  // 缓存下props
   const props = options.props
+  // 如果不存在，那么直接return
   if (!props) return
   const res = {}
   let i, val, name
   if (Array.isArray(props)) {
+    //如果 props 为数组, 直接循环数组
     i = props.length
     while (i--) {
       val = props[i]
       if (typeof val === 'string') {
+        // 如果数组里面的值是字符串，那么将其格式化成 {aaBb: {type: null}} 形式
         name = camelize(val)
         res[name] = { type: null }
       } else if (process.env.NODE_ENV !== 'production') {
+        // 如果不是字符串，则报警告
         warn('props must be strings when using array syntax.')
       }
     }
   } else if (isPlainObject(props)) {
+    // 如果 props 是一个对象，则进行一下处理
     for (const key in props) {
       val = props[key]
       name = camelize(key)
@@ -282,6 +287,7 @@ function normalizeProps (options: Object, vm: ?Component) {
         : { type: val }
     }
   } else if (process.env.NODE_ENV !== 'production') {
+    // 如果 props 既不是数组，也不是对象，那么报警告
     warn(
       `Invalid value for option "props": expected an Array or an Object, ` +
       `but got ${toRawType(props)}.`,
@@ -291,18 +297,20 @@ function normalizeProps (options: Object, vm: ?Component) {
   options.props = res
 }
 
-/**
- * Normalize all injections into Object-based format
- */
+// 规范化 child 里面的 Inject
 function normalizeInject (options: Object, vm: ?Component) {
+  // 缓存inject 且如果inject 不存在，则直接退出
   const inject = options.inject
   if (!inject) return
+
   const normalized = options.inject = {}
   if (Array.isArray(inject)) {
+    // 当 inject 是数组时，循环该数组，并且将其保存到对象中，格式为{aa: {from: aa}}
     for (let i = 0; i < inject.length; i++) {
       normalized[inject[i]] = { from: inject[i] }
     }
   } else if (isPlainObject(inject)) {
+    // 当 inject 为对象时， 格式化为{aa: {from: key, bb: bb}}
     for (const key in inject) {
       const val = inject[key]
       normalized[key] = isPlainObject(val)
@@ -310,6 +318,7 @@ function normalizeInject (options: Object, vm: ?Component) {
         : { from: val }
     }
   } else if (process.env.NODE_ENV !== 'production') {
+    // 当 inject 既不是数组，又不是对象时，报错
     warn(
       `Invalid value for option "inject": expected an Array or an Object, ` +
       `but got ${toRawType(inject)}.`,
@@ -318,12 +327,11 @@ function normalizeInject (options: Object, vm: ?Component) {
   }
 }
 
-/**
- * Normalize raw function directives into object format.
- */
+// 规范化 child 里面的 Directives
 function normalizeDirectives (options: Object) {
   const dirs = options.directives
   if (dirs) {
+    // 如果 dirs[key] 是函数，则将其规范化成 { bind: dirs[key], update: dirs[key] }形式
     for (const key in dirs) {
       const def = dirs[key]
       if (typeof def === 'function') {
@@ -343,28 +351,35 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
   }
 }
 
-// 合并options，这个在组件实例化或继承当中都有用到
+// 合并options，这个在组件实例化或继承当中都有用到，parent 为构造函数解析出来的options，child 为传入的options
+// 产生一个新的对象
 export function mergeOptions (
   parent: Object,
   child: Object,
   vm?: Component
 ): Object {
+  // 在非生产环境下，首先检查child中component.key的命名是否规范
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)
   }
 
+  // 说明child还可以是一个函数，也就是说，我们甚至可以将两个构造函数进行合并
   if (typeof child === 'function') {
     child = child.options
   }
 
+  // 规范化 child 里面的 props
   normalizeProps(child, vm)
+  // 规范化 child 里面的 Inject
   normalizeInject(child, vm)
+  // 规范化 child 里面的 Directives
   normalizeDirectives(child)
   
   // Apply extends and mixins on the child options,
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
+  // 将 child 上面的 mixins 和 extends 合并到 parent 上面，只有当 child 不是 另一个mergeoptions 调用结果的原始对象，切存在_base属性
   if (!child._base) {
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm)

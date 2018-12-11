@@ -52,10 +52,7 @@ export function toRawType (value: any): string {
   return _toString.call(value).slice(8, -1)
 }
 
-/**
- * Strict object type check. Only returns true
- * for plain JavaScript objects.
- */
+// 判读obj 是否为一个纯对象
 export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
@@ -111,9 +108,7 @@ export function makeMap (
     : val => map[val]
 }
 
-/**
- * Check if a tag is a built-in tag.
- */
+// 检查标签是否为slot 或 component
 export const isBuiltInTag = makeMap('slot,component', true)
 
 /**
@@ -141,9 +136,7 @@ export function hasOwn (obj: Object | Array<*>, key: string): boolean {
   return hasOwnProperty.call(obj, key)
 }
 
-/**
- * Create a cached version of a pure function.
- */
+// 为一个纯函数创建一个缓存版本的函数
 export function cached<F: Function> (fn: F): F {
   const cache = Object.create(null)
   return (function cachedFn (str: string) {
@@ -152,9 +145,7 @@ export function cached<F: Function> (fn: F): F {
   }: any)
 }
 
-/**
- * Camelize a hyphen-delimited string.
- */
+// 将中横线转驼峰
 const camelizeRE = /-(\w)/g
 export const camelize = cached((str: string): string => {
   return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')

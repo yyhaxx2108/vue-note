@@ -38,6 +38,9 @@ export function initMixin (Vue: Class<Component>) {
       // 因为动态选项合并非常慢，并且内部组件选项都不需要特殊处理，所以这里可以直接赋值，从而优化性能。
       initInternalComponent(vm, options)
     } else {
+      // resolveConstructorOptions(vm.constructor) 解析构造函数的options
+      // options 传入的options
+      // vm 实例自身
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
