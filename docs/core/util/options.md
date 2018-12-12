@@ -1,17 +1,36 @@
 # options
+这个文件的主要作用是将父组件配置和子组件配置合并到一起并返回
+
 
 ```javascript
-/**
- * 这个文件的主要作用是将父组件配置和子组件配置合并到一起并返回
- */
+
+import config from '../config'
+import { warn } from './debug'
+import { nativeWatch } from './env'
+import { set } from '../observer/index'
+
+import {
+  ASSET_TYPES,
+  LIFECYCLE_HOOKS
+} from 'shared/constants'
+
+import {
+  extend,
+  hasOwn,
+  camelize,
+  toRawType,
+  capitalize,
+  isBuiltInTag,
+  isPlainObject
+} from 'shared/util'
 
 // 此时strats是空对象
 const strats = config.optionMergeStrategies
 
-// 非生产环境中，el、propsData将采用默认合并选项
+// 非生产环境中，el、propsData将采用默认合并选项，之所以包装一下是方便抛出警告
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
-    // 如果 vm 不存在，报警告：key属性用在vm实例上，子组件中不存在vm
+    // 如果 vm 不存在，说明是合并父子组件选项，此时，el、propsData将不能被合并，也就是说child上面不应该出现el、propsData
     if (!vm) {
       warn(
         `option "${key}" can only be used during instance ` +
@@ -23,51 +42,54 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-/**
- * Helper that recursively merges two data objects together.
- */
+// 递归地将两个数据对象合并在一起的工具函数。总结出来就是：
+// 1.to[key] 存在且不是纯对象，那么返回to[key]
+// 2.to[key] 存在且是纯对象，但 from[key] 不是纯对象，那么返回 to[key]
+// 3.to[key] 存在且是纯对象，且 from[key] 不是纯对象，递归调用 mergeData
+// 4.to[key] 不存在，那么返回 from[key] 
 function mergeData (to: Object, from: ?Object): Object {
+  // 如果不存在 from 直接返回 to
   if (!from) return to
   let key, toVal, fromVal
+  // 缓存from 对象中 keys 到数组 keys
   const keys = Object.keys(from)
+  // 遍历keys
   for (let i = 0; i < keys.length; i++) {
     key = keys[i]
     toVal = to[key]
     fromVal = from[key]
+    // 如果 to[key] 不存在，那么 set(to, key, fromVal)
     if (!hasOwn(to, key)) {
+      // 用 set 是为了触发更改通知
       set(to, key, fromVal)
     } else if (
       toVal !== fromVal &&
       isPlainObject(toVal) &&
       isPlainObject(fromVal)
     ) {
+      // 如果 toVal !== fromVal 且 两者都是纯对象，那么递归调用此方法
       mergeData(toVal, fromVal)
     }
   }
   return to
 }
 
-/**
- * Data
- */
+// 合并data的具体实现
 export function mergeDataOrFn (
   parentVal: any,
   childVal: any,
   vm?: Component
 ): ?Function {
   if (!vm) {
-    // in a Vue.extend merge, both should be functions
+    // 在 Vue.extend merge 中, parentVal和childVal都必须是functions，且返回的是函数
     if (!childVal) {
+      // 没有 childVal，也就是说子组件的选项中没有 data 选项，那么直接返回 parentVal，如：Parent.extend({})
       return parentVal
     }
     if (!parentVal) {
       return childVal
     }
-    // when parentVal & childVal are both present,
-    // we need to return a function that returns the
-    // merged result of both functions... no need to
-    // check if parentVal is a function here because
-    // it has to be a function to pass previous merges.
+    // 当parentVal和childVal都存在时，我们需要返回一个函数，该函数返回两个函数的合并结果，这里不需要检查parentVal是否是一个函数，因为它必须是传递先前合并的函数
     return function mergedDataFn () {
       return mergeData(
         typeof childVal === 'function' ? childVal.call(this, this) : childVal,
@@ -75,8 +97,9 @@ export function mergeDataOrFn (
       )
     }
   } else {
+    // 合并实例与构造函数中的data，返回的是函数
     return function mergedInstanceDataFn () {
-      // instance merge
+      // 通过调用函数，先获取到值
       const instanceData = typeof childVal === 'function'
         ? childVal.call(vm, vm)
         : childVal
@@ -84,21 +107,26 @@ export function mergeDataOrFn (
         ? parentVal.call(vm, vm)
         : parentVal
       if (instanceData) {
+        // 如果存在 instanceData，调用 mergeData，且将值返回
         return mergeData(instanceData, defaultData)
       } else {
+        // 如果部存在 instanceData，直接返回defaultData
         return defaultData
       }
     }
   }
 }
 
+// 给 data 加上合并策略
 strats.data = function (
   parentVal: any,
   childVal: any,
   vm?: Component
 ): ?Function {
   if (!vm) {
+    // 合并父子组件的 data
     if (childVal && typeof childVal !== 'function') {
+      // 子组件的 data 应该为 function，如果不是则直接返回 parentVal，并报警告
       process.env.NODE_ENV !== 'production' && warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
@@ -110,95 +138,95 @@ strats.data = function (
     }
     return mergeDataOrFn(parentVal, childVal)
   }
-
+  // 合并实例和构造函数的 data
   return mergeDataOrFn(parentVal, childVal, vm)
 }
 
-/**
- * Hooks and props are merged as arrays.
- */
+// 生命周期钩子合并方法
 function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
 ): ?Array<Function> {
-  return childVal
-    ? parentVal
-      ? parentVal.concat(childVal)
-      : Array.isArray(childVal)
-        ? childVal
-        : [childVal]
+  return childVal                    // 是否存在 childVal
+    ? parentVal                      // 是否存在 parentVal
+      ? parentVal.concat(childVal)   // 如果存在 parentVal 和 childVal 那么直接将二者合并
+      : Array.isArray(childVal)      // 如果不存在 parentVal，那么判读 childVal 是否为数组
+        ? childVal                   // 是数组则直接返回
+        : [childVal]                 // 不是数组，那么包装成数组返回
     : parentVal
 }
 
+// 给实例的生命周期钩子加上合并策略
 LIFECYCLE_HOOKS.forEach(hook => {
   strats[hook] = mergeHook
 })
 
-/**
- * Assets
- *
- * When a vm is present (instance creation), we need to do
- * a three-way merge between constructor options, instance
- * options and parent options.
- */
+// 当存在vm时，我们需要在构造函数选项、实例选项和父选项之间进行三向合并。
 function mergeAssets (
   parentVal: ?Object,
   childVal: ?Object,
   vm?: Component,
   key: string
 ): Object {
+  // 如果 parentVal 存在，我们将 res 的 __proto__ 赋值成为 parentVal, 如果不存在，res 的 __proto__ 为 undefined
   const res = Object.create(parentVal || null)
   if (childVal) {
+    // 如果在非生产环境中，如果 childVal 不是纯对象那么报警告
     process.env.NODE_ENV !== 'production' && assertObjectType(key, childVal, vm)
+    // 返回合并后的 res，res 自身是 与 options 属性一样，原型上面挂载了父级元素的属性
     return extend(res, childVal)
   } else {
     return res
   }
 }
 
+// 给component、directive、filter加上合并策略
 ASSET_TYPES.forEach(function (type) {
   strats[type + 's'] = mergeAssets
 })
 
-/**
- * Watchers.
- *
- * Watchers hashes should not overwrite one
- * another, so we merge them as arrays.
- */
+// 给 watch 加上合并策略，Watchers 不能被覆盖，所以把 Watchers 当成数组处理
 strats.watch = function (
   parentVal: ?Object,
   childVal: ?Object,
   vm?: Component,
   key: string
 ): ?Object {
-  // work around Firefox's Object.prototype.watch...
+  // 火狐浏览器上面存在 watch， 所以需要以下处理
   if (parentVal === nativeWatch) parentVal = undefined
   if (childVal === nativeWatch) childVal = undefined
-  /* istanbul ignore if */
+  // 当 childVal 不存在时，返回 Object.create(parentVal || null)
   if (!childVal) return Object.create(parentVal || null)
   if (process.env.NODE_ENV !== 'production') {
+    // 在非生产环境中，先断言 childVal 是否为对象
     assertObjectType(key, childVal, vm)
   }
+  // // 当 parentVal 不存在时，返回 childVal
   if (!parentVal) return childVal
+  // 定义 ret 常量，其值为一个对象
   const ret = {}
+  // 将 parentVal 的属性混合到 ret 中，后面处理的都将是 ret 对象，最后返回的也是 ret 对象
   extend(ret, parentVal)
+  // 遍历 childVal
   for (const key in childVal) {
+    // 由于遍历的是 childVal，所以 key 是子选项的 key，父选项中未必能获取到值，所以 parent 未必有值
     let parent = ret[key]
     const child = childVal[key]
+    // 如果 parent 存在，就将其转为数组
     if (parent && !Array.isArray(parent)) {
       parent = [parent]
     }
+    // 如果 parent 存在，此时的 parent 应该已经被转为数组了，所以直接将 child concat 进去
+    // 如果 parent 不存在，直接将 child 转为数组返回
     ret[key] = parent
       ? parent.concat(child)
       : Array.isArray(child) ? child : [child]
   }
+  // 最后返回新的 ret 对象
   return ret
 }
 
-/**
- * Other object hashes.
- */
+// props、methods、inject、computed 的 合并策略
 strats.props =
 strats.methods =
 strats.inject =
@@ -209,19 +237,22 @@ strats.computed = function (
   key: string
 ): ?Object {
   if (childVal && process.env.NODE_ENV !== 'production') {
+    // 首先断言 childVal 是否为 Object
     assertObjectType(key, childVal, vm)
   }
+  // parentVal 不存在的情况下直接返回 childVal
   if (!parentVal) return childVal
+  // 如果 parentVal 存在，则创建 ret 对象，然后分别将 parentVal 和 childVal 的属性混合到 ret 中，childVal 将覆盖 parentVal 的同名属性
   const ret = Object.create(null)
   extend(ret, parentVal)
   if (childVal) extend(ret, childVal)
+  // 最后返回 ret 对象。
   return ret
 }
+// provide 的合并策略，此合并策略和data的一样
 strats.provide = mergeDataOrFn
 
-/**
- * Default strategy.
- */
+// 默认合并策略，如果 childVal 存在，则使用 childVal 的值，否则使用 parentVal
 const defaultStrat = function (parentVal: any, childVal: any): any {
   return childVal === undefined
     ? parentVal
@@ -341,6 +372,7 @@ function normalizeDirectives (options: Object) {
   }
 }
 
+// 断言 value 是否为纯对象
 function assertObjectType (name: string, value: any, vm: ?Component) {
   if (!isPlainObject(value)) {
     warn(
@@ -375,15 +407,13 @@ export function mergeOptions (
   // 规范化 child 里面的 Directives
   normalizeDirectives(child)
   
-  // Apply extends and mixins on the child options,
-  // but only if it is a raw options object that isn't
-  // the result of another mergeOptions call.
-  // Only merged options has the _base property.
   // 将 child 上面的 mixins 和 extends 合并到 parent 上面，只有当 child 不是 另一个mergeoptions 调用结果的原始对象，切存在_base属性
   if (!child._base) {
+    // 判断 child.extends 是否存在，如果存在 递归调用 mergeOptions，并且保存在覆盖 parent
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm)
     }
+    // 与 extends 一样，不过 mixins 是数组
     if (child.mixins) {
       for (let i = 0, l = child.mixins.length; i < l; i++) {
         parent = mergeOptions(parent, child.mixins[i], vm)
@@ -391,20 +421,26 @@ export function mergeOptions (
     }
   }
 
+  // 接下来是真正的合并操作
   const options = {}
   let key
+  // 遍历 parent 并且进行mergeField
   for (key in parent) {
     mergeField(key)
   }
+  // 遍历 child 如果 parent 自身有此方法，进行mergeField，因为前面一个for in 已经调用了
   for (key in child) {
     if (!hasOwn(parent, key)) {
       mergeField(key)
     }
   }
   function mergeField (key) {
+    // 如果上面对 strats[key] 有定义则使用 strats[key] 否则使用 defaultStrat
     const strat = strats[key] || defaultStrat
+    // 通过合并策略计算出key 的值，并保存到options上
     options[key] = strat(parent[key], child[key], vm, key)
   }
+  // 将 options 返回
   return options
 }
 
@@ -419,7 +455,6 @@ export function resolveAsset (
   id: string,
   warnMissing?: boolean
 ): any {
-  /* istanbul ignore if */
   if (typeof id !== 'string') {
     return
   }

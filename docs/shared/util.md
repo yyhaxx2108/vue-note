@@ -48,6 +48,7 @@ export function isObject (obj: mixed): boolean %checks {
  */
 const _toString = Object.prototype.toString
 
+// 判断数据类型
 export function toRawType (value: any): string {
   return _toString.call(value).slice(8, -1)
 }
@@ -128,9 +129,7 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
   }
 }
 
-/**
- * Check whether an object has the property.
- */
+// 判断对象自身是否有此属性
 const hasOwnProperty = Object.prototype.hasOwnProperty
 export function hasOwn (obj: Object | Array<*>, key: string): boolean {
   return hasOwnProperty.call(obj, key)

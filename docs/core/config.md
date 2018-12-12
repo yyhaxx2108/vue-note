@@ -10,7 +10,7 @@ import {
 import { LIFECYCLE_HOOKS } from 'shared/constants'
 
 export type Config = {
-  // user
+  // 自定义合并选项，是由不同的方法构成的对象
   optionMergeStrategies: { [key: string]: Function };
   silent: boolean;
   productionTip: boolean;
