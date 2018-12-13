@@ -76,10 +76,7 @@ export default ({
    */
   ignoredElements: [],
 
-  /**
-   * Custom user key aliases for v-on
-   */
-  // $flow-disable-line
+  // 用户自定义的按键别名
   keyCodes: Object.create(null),
 
   /**

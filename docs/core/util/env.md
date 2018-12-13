@@ -52,7 +52,7 @@ export const isServerRendering = () => {
 // detect devtools
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
-/* istanbul ignore next */
+// 判断 Ctor 是否为浏览器原生方法，如：function Proxy() { [native code] }
 export function isNative (Ctor: any): boolean {
   return typeof Ctor === 'function' && /native code/.test(Ctor.toString())
 }
@@ -62,7 +62,6 @@ export const hasSymbol =
   typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)
 
 let _Set
-/* istanbul ignore if */ // $flow-disable-line
 if (typeof Set !== 'undefined' && isNative(Set)) {
   // use native Set when available.
   _Set = Set
