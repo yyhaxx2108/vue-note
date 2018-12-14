@@ -50,6 +50,7 @@ export function initMixin (Vue: Class<Component>) {
 
     // 代理vm实例的属性, 即 vm._renderProxy 的值就是 vm
     if (process.env.NODE_ENV !== 'production') {
+      // 主要是为了提供更好的提示信息
       initProxy(vm)
     } else {
       vm._renderProxy = vm
