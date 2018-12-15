@@ -67,7 +67,8 @@ if (process.env.NODE_ENV !== 'production') {
     has (target, key) {
       // 是否存在在 target 上，has 可以拦截 with 语句块里对变量的访问
       const has = key in target
-      // 是否是被允许访问的key，即 allowedGlobals(key) 或者 (typeof key === 'string' && key.charAt(0) === '_' && !(key in target.$data))
+      // 是否是被允许访问的key，即 allowedGlobals(key) 或者 
+      // (typeof key === 'string' && key.charAt(0) === '_' && !(key in target.$data)) 比如_c等
       const isAllowed = allowedGlobals(key) ||
         (typeof key === 'string' && key.charAt(0) === '_' && !(key in target.$data))
       if (!has && !isAllowed) {
@@ -94,10 +95,10 @@ if (process.env.NODE_ENV !== 'production') {
 
   initProxy = function initProxy (vm) {
     if (hasProxy) {
-      // determine which proxy handler to use
       // vm.$options 的引用
       const options = vm.$options
-      // 如果 options.render._withStripped==true，那么就是getHandler，否值就是hasHandler
+      // 如果 options.render._withStripped为true，那么就是getHandler，否值就是hasHandler
+      // 当手写 render 函数时，为了捕获到错误，需要手动将 render._withStripped 设置为 true
       const handlers = options.render && options.render._withStripped
         ? getHandler
         : hasHandler
