@@ -56,6 +56,7 @@ export function initMixin (Vue: Class<Component>) {
       vm._renderProxy = vm
     }
     // 通过 vm._self 暴露事例自身
+    // 与上面的 vm._renderProxy 可能不同，vm._renderProxy 可能是 proxy 代理的实例
     vm._self = vm
     // initLifeCycle初始化一些生命周期相关的属性
     initLifecycle(vm)
@@ -63,15 +64,15 @@ export function initMixin (Vue: Class<Component>) {
     initEvents(vm)
     // 初始化Render相关
     initRender(vm)
-    // 触发beforeCreate钩子
+    // 调用 beforeCreate 函数
     callHook(vm, 'beforeCreate')
     // 初始化inject
-    initInjections(vm) // resolve injections before data/props
+    initInjections(vm)
     // 初始化 props, methods, data, computed 和 watch
     initState(vm)
     // 初始化provide
-    initProvide(vm) // resolve provide after data/props
-    // 触发created钩子
+    initProvide(vm)
+    // 调用 created 函数
     callHook(vm, 'created')
 
     // 性能测量相关，与之前代码相对应

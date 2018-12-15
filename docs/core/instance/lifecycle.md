@@ -1,26 +1,56 @@
 # lifecycle
 
 ```javascript
+import config from '../config'
+import Watcher from '../observer/watcher'
+import { mark, measure } from '../util/perf'
+import { createEmptyVNode } from '../vdom/vnode'
+import { updateComponentListeners } from './events'
+import { resolveSlots } from './render-helpers/resolve-slots'
+import { toggleObserving } from '../observer/index'
+import { pushTarget, popTarget } from '../observer/dep'
 
+import {
+  warn,
+  noop,
+  remove,
+  handleError,
+  emptyObject,
+  validateProp
+} from '../util/index'
+
+// 这个变量将总是保存着当前正在渲染的实例的引用
 export let activeInstance: any = null
+
+// 定义 isUpdatingChildComponent，并初始化为 false
 export let isUpdatingChildComponent: boolean = false
 
 export function initLifecycle (vm: Component) {
+  // 引用 vm.$options 到 options，并且后面都是使用 options
   const options = vm.$options
 
-  // locate first non-abstract parent
+  // 定义 parent 值为 options.parent，
+  // options.parent 除了可以通过 options 传入外，另一个生成途径来自createComponentInstanceForVnode
   let parent = options.parent
   if (parent && !options.abstract) {
+    // 如果当前实例有父组件，且当前实例不是抽象的
+    // 使用 while 循环查找第一个非抽象的父组件
+    // 抽象组件不会渲染DOM至页面，也不会出现在父子关系的路径上
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
+    // 将当前组件实例push到第一个非抽象父组件的 $children 中
     parent.$children.push(vm)
   }
 
+  // 设置 vm 的 $parent 为第一个非抽象父组件
   vm.$parent = parent
+  // 设置 vm 的 $root 为 有父级就是用父级的 $root，否则 $root 指向自身
   vm.$root = parent ? parent.$root : vm
 
+  // 子组件数组
   vm.$children = []
+  // $refs 为节点的引用
   vm.$refs = {}
 
   vm._watcher = null
@@ -200,6 +230,8 @@ export function updateChildComponent (
   renderChildren: ?Array<VNode>
 ) {
   if (process.env.NODE_ENV !== 'production') {
+    // 在非生产环境中，在更新开始时将isUpdatingChildComponent设置为true
+    // 试图修改 vm.$attr 或 vm.$listeners 可能会用到
     isUpdatingChildComponent = true
   }
 
@@ -254,6 +286,7 @@ export function updateChildComponent (
   }
 
   if (process.env.NODE_ENV !== 'production') {
+    // 在更新完成后，将其设置为false
     isUpdatingChildComponent = false
   }
 }
@@ -299,19 +332,26 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
   }
 }
 
+// 调用生命周期函数
 export function callHook (vm: Component, hook: string) {
-  // #7573 disable dep collection when invoking lifecycle hooks
+  // 加上 pushTarget 和 popTarget，为了避免在某些生命周期钩子中使用 props 数据导致收集冗余的依赖
   pushTarget()
+  // 生命周期钩子选项通过合并会变成一个数组
   const handlers = vm.$options[hook]
   if (handlers) {
+    // handlers 可能不存在
     for (let i = 0, j = handlers.length; i < j; i++) {
+      // 生命周期钩子函数由用户编写，应该捕获错误
       try {
+        // 使用call(vm) 能保证 生命钩子函数的this指向vm
         handlers[i].call(vm)
       } catch (e) {
+        // 如果钩子函数有错误，则交给 handleError 处理
         handleError(e, vm, `${hook} hook`)
       }
     }
   }
+  // 在 initEvents 函数中定义的，它的作用是判断是否存在生命周期钩子的事件侦听器
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

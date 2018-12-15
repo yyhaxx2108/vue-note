@@ -1,30 +1,49 @@
 # render
 
 ```javascript
+import {
+  warn,
+  nextTick,
+  emptyObject,
+  handleError,
+  defineReactive
+} from '../util/index'
+
+import { createElement } from '../vdom/create-element'
+import { installRenderHelpers } from './render-helpers/index'
+import { resolveSlots } from './render-helpers/resolve-slots'
+import VNode, { createEmptyVNode } from '../vdom/vnode'
+
+import { isUpdatingChildComponent } from './lifecycle'
 
 export function initRender (vm: Component) {
-  vm._vnode = null // the root of the child tree
-  vm._staticTrees = null // v-once cached trees
+  // 在 vm 上添加 _vnode
+  vm._vnode = null 
+  // 在 vm 上添加 _staticTrees
+  vm._staticTrees = null
+
   const options = vm.$options
-  const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
+  // 父组件中占位标签
+  const parentVnode = vm.$vnode = options._parentVnode
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
+  // 将 vm.$scopedSlots 赋值成为一个空对象
   vm.$scopedSlots = emptyObject
-  // bind the createElement fn to this instance
-  // so that we get proper render context inside it.
-  // args order: tag, data, children, normalizationType, alwaysNormalize
-  // internal version is used by render functions compiled from templates
+  // 是对内部函数 createElement 的包装
+  // 为了获取正确的上下文环境，我们将 createElement 方法绑定到这个实例上
+  // a, b, c, d 分别代表 tag，data，children，normalizationType
+  // 内部调用，编译器根据模板字符串生成的渲染函数的
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
-  // normalization is always applied for the public version, used in
-  // user-written render functions.
+  // 用户写 render 函数时调用
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
-  // $attrs & $listeners are exposed for easier HOC creation.
-  // they need to be reactive so that HOCs using them are always updated
+  // $attrs、$listeners主要用于创建高级别的组件
   const parentData = parentVnode && parentVnode.data
-
-  /* istanbul ignore else */
+  // 将$attrs、$listeners定义成为响应式的
   if (process.env.NODE_ENV !== 'production') {
+    // 在非生产环境中，setter函数会有报警告的操作，具体是 !isUpdatingChildComponent 成立时
+    // isUpdatingChildComponent 一般情况为 false， 
+    // isUpdatingChildComponent 当执行updateChildComponent的开始为变为 true，结束后变回 false
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, () => {
       !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
     }, true)

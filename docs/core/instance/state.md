@@ -2,6 +2,41 @@
 
 ```javascript
 
+import config from '../config'
+import Watcher from '../observer/watcher'
+import Dep, { pushTarget, popTarget } from '../observer/dep'
+import { isUpdatingChildComponent } from './lifecycle'
+
+import {
+  set,
+  del,
+  observe,
+  defineReactive,
+  toggleObserving
+} from '../observer/index'
+
+import {
+  warn,
+  bind,
+  noop,
+  hasOwn,
+  hyphenate,
+  isReserved,
+  handleError,
+  nativeWatch,
+  validateProp,
+  isPlainObject,
+  isServerRendering,
+  isReservedAttribute
+} from '../util/index'
+
+const sharedPropertyDefinition = {
+  enumerable: true,
+  configurable: true,
+  get: noop,
+  set: noop
+}
+
 const sharedPropertyDefinition = {
   enumerable: true,
   configurable: true,

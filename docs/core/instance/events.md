@@ -2,7 +2,9 @@
 
 ```javascript
 export function initEvents (vm: Component) {
+  // vm._events 初始化成一个空对象
   vm._events = Object.create(null)
+  // vm._hasHookEvent 初始化成false
   vm._hasHookEvent = false
   // init parent attached events
   const listeners = vm.$options._parentListeners
