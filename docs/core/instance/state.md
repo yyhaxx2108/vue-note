@@ -44,6 +44,7 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+// 代理 proxy(vm, `_data`, key) 
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -128,10 +129,14 @@ function initProps (vm: Component, propsOptions: Object) {
 }
 
 function initData (vm: Component) {
+  // 定义 data，且 data 为 vm.$options.data 的引用
   let data = vm.$options.data
+  // 这里对 data 进行了取值
+  // mergeOptions 将 data 变成了函数，但是 beforeCreated 中，可能将其修改
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
+  // 如果 data 不是纯对象，那么报警告
   if (!isPlainObject(data)) {
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
@@ -140,14 +145,18 @@ function initData (vm: Component) {
       vm
     )
   }
-  // proxy data on instance
+  // 获取 data 对象的所有键
   const keys = Object.keys(data)
+  // 缓存 props
   const props = vm.$options.props
+  // 缓存 methods
   const methods = vm.$options.methods
   let i = keys.length
+  // 对 keys 进行遍历
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
+      // 如果 methods 中有 key 抛出警告
       if (methods && hasOwn(methods, key)) {
         warn(
           `Method "${key}" has already been defined as a data property.`,
@@ -156,26 +165,33 @@ function initData (vm: Component) {
       }
     }
     if (props && hasOwn(props, key)) {
+      // 如果 props 中有 key 抛出警告
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
         `Use prop default value instead.`,
         vm
       )
     } else if (!isReserved(key)) {
+      // 如果 key 不是保留字， 则对key进行代理
       proxy(vm, `_data`, key)
     }
   }
-  // observe data
+  // 调用 observe 函数将 data 数据对象转换成响应式的
   observe(data, true /* asRootData */)
 }
 
+// 通过调用 data 函数获取真正的数据对象并返回
 export function getData (data: Function, vm: Component): any {
-  // #7573 disable dep collection when invoking data getters
+  // pushTarget、popTarget为了防止使用 props 数据初始化 data 数据时收集冗余的依赖
   pushTarget()
+  // data 函数可能会报错，所以需要包裹在try catch里面
   try {
+    // 返回 data 调用的返回值
     return data.call(vm, vm)
   } catch (e) {
+    // 如果报错，打印日志
     handleError(e, vm, `data()`)
+    // 返回一个空对象
     return {}
   } finally {
     popTarget()
