@@ -55,16 +55,25 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 }
 
 export function initState (vm: Component) {
+  // vm 添加一个属性 vm._watchers = []
+  // 其初始值是一个数组，这个数组将用来存储所有该组件实例的 watcher 对象
   vm._watchers = []
+  // 定义了常量 opts，它是 vm.$options 的引用
   const opts = vm.$options
+  // 选项中有 props，那么就调用 initProps 初始化 props 选项
   if (opts.props) initProps(vm, opts.props)
+  // 选项中有 methods，那么就调用 initMethods 初始化 methods 选项
   if (opts.methods) initMethods(vm, opts.methods)
   if (opts.data) {
+    // 选项如果存在 data，那么调用 initData 初始化 data
     initData(vm)
   } else {
+    // 如果不存在则直接调用 observe 函数观测一个空对象
     observe(vm._data = {}, true /* asRootData */)
   }
+  // 选项中有 computed，那么就调用 initComputed 初始化 computed 选项
   if (opts.computed) initComputed(vm, opts.computed)
+  // 选项中有 watch，且不是原生 watch，那么就调用 initwatch 初始化 watch 选项
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
   }
