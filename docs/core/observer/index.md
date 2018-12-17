@@ -32,34 +32,45 @@ export function toggleObserving (value: boolean) {
 // 附加到每个观察对象的观察器类
 // 一旦附加，观察者将目标对象的属性键转换为收集依赖项和分派更新的getter/setter
 export class Observer {
+  // 数据对象本身
   value: any;
+  // Dep 实例对象
   dep: Dep;
+  // 用此对象为根数据的 vm 的数量
   vmCount: number; // number of vms that have this object as root $data
 
   constructor (value: any) {
+    // 引用了数据对象本身，这是一个循环引用
     this.value = value
+    // 实例化一个dep
     this.dep = new Dep()
+    // vmCount 初始为0
     this.vmCount = 0
+    // 使用 def 函数，为数据对象定义了一个 __ob__ 属性，这个属性的值就是当前 Observer 实例对象
+    // 这里的 __ob__ 是不可枚举的属性，防止后面被遍历到
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
+      // 如果 value 是数组则进行下面操作
       if (hasProto) {
+        // 如果存在 __proto__
         protoAugment(value, arrayMethods)
       } else {
+        // 如果不存在 __proto__
         copyAugment(value, arrayMethods, arrayKeys)
       }
       this.observeArray(value)
     } else {
+      // 如果 value 是对象则直接walk
       this.walk(value)
     }
   }
 
-  /**
-   * Walk through all properties and convert them into
-   * getter/setters. This method should only be called when
-   * value type is Object.
-   */
+  // 当 value 是对象时会调用此方法
+  // 遍历所有的属性，并且将他们转化为 getter/setters
   walk (obj: Object) {
+    // 获取可以枚举的 keys
     const keys = Object.keys(obj)
+    // 遍历keys，并且调用 defineReactive
     for (let i = 0; i < keys.length; i++) {
       defineReactive(obj, keys[i])
     }
@@ -134,9 +145,8 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
   return ob
 }
 
-/**
- * Define a reactive property on an Object.
- */
+// 定义一个响应式的对象
+// 该函数核心就是将数据对象的数据属性转换为访问器属性，即设置一对 getter/setter
 export function defineReactive (
   obj: Object,
   key: string,
@@ -144,20 +154,28 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 首先实例化了一个 Dep 对象，这个对象会闭包保存
+  // 每一个key 都有一个 dep 对象来收集对应的依赖
   const dep = new Dep()
-
+  // 方法返回指定对象上一个自有属性对应的属性描述符
   const property = Object.getOwnPropertyDescriptor(obj, key)
+  // 如果 property.configurable === false 则说明定义的 value 不可枚举，那么直接返回
   if (property && property.configurable === false) {
     return
   }
 
-  // cater for pre-defined getter/setters
+  // 缓存预定义的 getter
   const getter = property && property.get
+  // 缓存预定义的 setter
   const setter = property && property.set
+
+  // arguments.length === 2 是当前函数只传递了两参数
   if ((!getter || setter) && arguments.length === 2) {
+    // 根据 key 获取 val
     val = obj[key]
   }
 
+  // 当!shallow 时，observe(val)，并且赋值给 childOb
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,

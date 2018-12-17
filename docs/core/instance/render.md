@@ -40,6 +40,7 @@ export function initRender (vm: Component) {
   // $attrs、$listeners主要用于创建高级别的组件
   const parentData = parentVnode && parentVnode.data
   // 将$attrs、$listeners定义成为响应式的
+  // $attrs、$listeners 均为非深度观察
   if (process.env.NODE_ENV !== 'production') {
     // 在非生产环境中，setter函数会有报警告的操作，具体是 !isUpdatingChildComponent 成立时
     // isUpdatingChildComponent 一般情况为 false， 

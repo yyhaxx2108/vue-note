@@ -2,7 +2,7 @@
 
 ```javascript
 
-// can we use __proto__?
+// 是否可以使用 __proto__
 export const hasProto = '__proto__' in {}
 
 // Browser environment sniffing
