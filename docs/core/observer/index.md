@@ -21,22 +21,16 @@ import {
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
-/**
- * In some cases we may want to disable observation inside a component's
- * update computation.
- */
+// 某些情况下，我们可能希望禁用组件更新计算中的观察
 export let shouldObserve: boolean = true
 
+// 修改是否可以观察的标志
 export function toggleObserving (value: boolean) {
   shouldObserve = value
 }
 
-/**
- * Observer class that is attached to each observed
- * object. Once attached, the observer converts the target
- * object's property keys into getter/setters that
- * collect dependencies and dispatch updates.
- */
+// 附加到每个观察对象的观察器类
+// 一旦附加，观察者将目标对象的属性键转换为收集依赖项和分派更新的getter/setter
 export class Observer {
   value: any;
   dep: Dep;
@@ -105,17 +99,19 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
   }
 }
 
-/**
- * Attempt to create an observer instance for a value,
- * returns the new observer if successfully observed,
- * or the existing observer if the value already has one.
- */
+// 试图为值创建一个观察者对象实例，
+// 如果观察成功，将创建好的对象返回，
+// 如果已经存在观察者，则将存在的观察者返回
+// value 为需要观测的值，asRootData 表示是否当作根级数据
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
+    // 如果 value 不是纯对象或者是VNode 则直接返回
     return
   }
+  // 用 ob 保存一个 Observer 实例
   let ob: Observer | void
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+    // 如果已经存在观察者，则将存在的观察者返回，避免重复观察
     ob = value.__ob__
   } else if (
     shouldObserve &&
@@ -124,6 +120,12 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
+    // 可以观测的条件是
+    // 1.shouldObserve 为 true
+    // 2.不是服务端渲染
+    // 3.是存对象或者数组
+    // 4.改对象是可以在上面添加新属性的，Object.preventExtensions，Object.seal 或 Object.freeze 都可以禁止添加属性
+    // 5.value._isVue 必须为真
     ob = new Observer(value)
   }
   if (asRootData && ob) {

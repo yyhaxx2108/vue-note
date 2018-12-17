@@ -177,7 +177,7 @@ function initData (vm: Component) {
     }
   }
   // 调用 observe 函数将 data 数据对象转换成响应式的
-  observe(data, true /* asRootData */)
+  observe(data, true)
 }
 
 // 通过调用 data 函数获取真正的数据对象并返回
