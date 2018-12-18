@@ -52,7 +52,7 @@ export class Observer {
     if (Array.isArray(value)) {
       // 如果 value 是数组则进行下面操作
       if (hasProto) {
-        // 如果存在 __proto__
+        // 如果存在 __proto__, __proto__ ie11后才开始支持
         protoAugment(value, arrayMethods)
       } else {
         // 如果不存在 __proto__
@@ -134,12 +134,13 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     // 可以观测的条件是
     // 1.shouldObserve 为 true
     // 2.不是服务端渲染
-    // 3.是存对象或者数组
+    // 3.是纯对象或者数组
     // 4.改对象是可以在上面添加新属性的，Object.preventExtensions，Object.seal 或 Object.freeze 都可以禁止添加属性
     // 5.value._isVue 必须为真
     ob = new Observer(value)
   }
   if (asRootData && ob) {
+    // 如果是根对象，且存在 ob， 那么 ob.vmCount++
     ob.vmCount++
   }
   return ob
@@ -169,48 +170,67 @@ export function defineReactive (
   // 缓存预定义的 setter
   const setter = property && property.set
 
+  // !getter || setter 的目的是保证定义响应式数据行为的一致性
   // arguments.length === 2 是当前函数只传递了两参数
   if ((!getter || setter) && arguments.length === 2) {
     // 根据 key 获取 val
     val = obj[key]
   }
 
-  // 当!shallow 时，observe(val)，并且赋值给 childOb
+  // 当!shallow 时，observe(val)，并且赋值给 childOb，observe 返回值是一个Observe的实例对象
   let childOb = !shallow && observe(val)
+  // 转化成为 getter/setter
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      // 如果存在 getter 方法，那么调用 getter 取值，否则用 val 当 value 的值
       const value = getter ? getter.call(obj) : val
+      // 收集依赖，其中 Dep.target 为 要被收集对依赖
       if (Dep.target) {
+        // 如果存在需要被收集对依赖，执行依赖收集，dep 为当前对象下面对闭包
+        // 此依赖触发的时机是当前属性值被修改
         dep.depend()
+        // childOb 也被闭包引用
         if (childOb) {
+          // childOb 存在，childOb.dep.depend 也搜集依赖
+          // 此依赖触发的时机是 Vue.set 给对象添加新的属性
           childOb.dep.depend()
+
           if (Array.isArray(value)) {
+            // 如果是数组，进行 dependArray 操作
             dependArray(value)
           }
         }
       }
+      // 返回 value
       return value
     },
     set: function reactiveSetter (newVal) {
+      // 首先获取到 value 值
       const value = getter ? getter.call(obj) : val
-      /* eslint-disable no-self-compare */
+      // 如果新的值和原来的值相等，或者是NaN，那么直接返回，不用进行操作
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
-      /* eslint-enable no-self-compare */
+      
+      // 在非生产环境中，如果 customSetter 存在，则调用 customSetter，如initRender
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
-      // #7981: for accessor properties without setter
+      // 避免不必要的观察
       if (getter && !setter) return
+      // 设置新的值
       if (setter) {
+        // 如果存在setter，则调用setter
         setter.call(obj, newVal)
       } else {
+        // 如果不存在setter，则 val = newVal
         val = newVal
       }
+      // 当 !shallow，newVal可能是对象，或者是数组，所以我们需要对他进行观察
       childOb = !shallow && observe(newVal)
+      // 触发依赖
       dep.notify()
     }
   })
