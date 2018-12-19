@@ -41,11 +41,14 @@ extend(Vue.options.components, platformComponents)
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // 给 Vue.prototype 加上 $mount 方法
+// el 既可以是一个字符串，也可以是一个 DOM 元素
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  // 如果存在 el，并且浏览器环境下，将 el 转换为 Element
   el = el && inBrowser ? query(el) : undefined
+  // 完成真正的挂载，并且将其结果返回
   return mountComponent(this, el, hydrating)
 }
 

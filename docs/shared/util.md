@@ -135,10 +135,13 @@ export function hasOwn (obj: Object | Array<*>, key: string): boolean {
 }
 
 // 为一个纯函数创建一个缓存版本的函数
+// fn 一定要是一个纯函数
 export function cached<F: Function> (fn: F): F {
+  // 创建一个 cache 空对象，且闭包引用
   const cache = Object.create(null)
   return (function cachedFn (str: string) {
     const hit = cache[str]
+    // 如果有缓存，那么先读缓存，否则才求值，且保存到闭包的缓存中
     return hit || (cache[str] = fn(str))
   }: any)
 }
