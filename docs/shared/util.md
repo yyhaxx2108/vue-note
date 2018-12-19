@@ -3,27 +3,27 @@
 
 export const emptyObject = Object.freeze({})
 
-// These helpers produce better VM code in JS engines due to their
-// explicitness and function inlining.
+// 判断给定变量是否是未定义，当变量值为 null时，也会认为其是未定义
 export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
 
+// 判断给定变量是否定义
 export function isDef (v: any): boolean %checks {
   return v !== undefined && v !== null
 }
 
+// 判断给定变量是否是 true
 export function isTrue (v: any): boolean %checks {
   return v === true
 }
 
+// 判断给定变量是否是 false
 export function isFalse (v: any): boolean %checks {
   return v === false
 }
 
-/**
- * Check if value is primitive.
- */
+// 判断给定变量是否是原始类型值，即 string，number，boolean，symbol
 export function isPrimitive (value: any): boolean %checks {
   return (
     typeof value === 'string' ||
@@ -62,10 +62,9 @@ export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
 }
 
-/**
- * Check if val is a valid array index.
- */
+// 检查是否为有效的索引
 export function isValidArrayIndex (val: any): boolean {
+  // 1.大于等于 0 的整数， 2.不能是无限的
   const n = parseFloat(String(val))
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }

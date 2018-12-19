@@ -23,8 +23,13 @@ methodsToPatch.forEach(function (method) {
   const original = arrayProto[method]
   
   def(arrayMethods, method, function mutator (...args) {
+    // 保存原生方法运行结果
     const result = original.apply(this, args)
+    // 这里的 this 是数组本身，ob 是一个 Observe 实例对象
     const ob = this.__ob__
+    // push, unshift, splice 都会往数组里面增加元素，新增加的元素用insert 缓存
+    // inserted 是数组
+    // splice 第三个以后的都是需要插入数组的元素
     let inserted
     switch (method) {
       case 'push':
@@ -35,9 +40,11 @@ methodsToPatch.forEach(function (method) {
         inserted = args.slice(2)
         break
     }
+    // inserted 是数组，所以调用 ob.observeArray 继续观察 inserted
     if (inserted) ob.observeArray(inserted)
-    // notify change
+    // 数组发生改变，所以触发依赖
     ob.dep.notify()
+    // 返回原生方法的运行结果
     return result
   })
 })

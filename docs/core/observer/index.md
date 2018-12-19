@@ -1,7 +1,6 @@
 # index
 
 ```javascript
-/* @flow */
 
 import Dep from './dep'
 import VNode from '../vdom/vnode'
@@ -19,6 +18,7 @@ import {
   isServerRendering
 } from '../util/index'
 
+// 获取自身变异方法 keys
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 // 某些情况下，我们可能希望禁用组件更新计算中的观察
@@ -58,6 +58,7 @@ export class Observer {
         // 如果不存在 __proto__
         copyAugment(value, arrayMethods, arrayKeys)
       }
+      // 对数组里面的元素进行观测
       this.observeArray(value)
     } else {
       // 如果 value 是对象则直接walk
@@ -76,9 +77,7 @@ export class Observer {
     }
   }
 
-  /**
-   * Observe a list of Array items.
-   */
+  // 分别对数组的元素进行观测
   observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
       observe(items[i])
@@ -86,23 +85,12 @@ export class Observer {
   }
 }
 
-// helpers
-
-/**
- * Augment a target Object or Array by intercepting
- * the prototype chain using __proto__
- */
+// 如果存在 __proto__，通过拦截原型链，增强目标对象，直接将对象的原型修改为 __proto__
 function protoAugment (target, src: Object) {
-  /* eslint-disable no-proto */
   target.__proto__ = src
-  /* eslint-enable no-proto */
 }
 
-/**
- * Augment a target Object or Array by defining
- * hidden properties.
- */
-/* istanbul ignore next */
+// 如果不存在 __proto__，通过定义隐藏属性或方法来扩展对象
 function copyAugment (target: Object, src: Object, keys: Array<string>) {
   for (let i = 0, l = keys.length; i < l; i++) {
     const key = keys[i]
@@ -110,7 +98,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
   }
 }
 
-// 试图为值创建一个观察者对象实例，
+// 观测的工厂函数，试图为值创建一个观察者对象实例，
 // 如果观察成功，将创建好的对象返回，
 // 如果已经存在观察者，则将存在的观察者返回
 // value 为需要观测的值，asRootData 表示是否当作根级数据
@@ -140,7 +128,8 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     ob = new Observer(value)
   }
   if (asRootData && ob) {
-    // 如果是根对象，且存在 ob， 那么 ob.vmCount++
+    // 如果是根对象，且存在 ob，那么 ob.vmCount++
+    // 根数据对象不能添加响应式属性
     ob.vmCount++
   }
   return ob
@@ -237,22 +226,36 @@ export function defineReactive (
 }
 
 // 在对象上设置属性。添加新属性，如果属性不存在，则触发更改通知。
+// target 是将要被添加属性的对象, 参数 key 是健名，val 是值
 export function set (target: Array<any> | Object, key: any, val: any): any {
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
-    warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
+    // 如果 target 是基础类型，那么报警告
+    warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target)}`)
   }
+
+  // 当 target 是数组，并且 key 是有效的索引值时，进行以下操作
   if (Array.isArray(target) && isValidArrayIndex(key)) {
+    // 首先增加 target 长度
     target.length = Math.max(target.length, key)
+    // 修改 target 中 key 元素的值为 val，splice方法本身是能够触发响应
     target.splice(key, 1, val)
+    // 返回 val
     return val
   }
+  // 当 key 是 target 自身的元素时，如下：
   if (key in target && !(key in Object.prototype)) {
+    // 将 val 赋值给 target[key]，赋值的过程将触发响应
     target[key] = val
+    // 返回 val
     return val
   }
-  const ob = (target: any).__ob__
+  // 下面操作是给对象添加一个新的属性
+  // ob 引用数据对象 target.__ob__
+  const ob = target.__ob__
+  // 1. 不能给 vm 实例添加响应式属性
+  // 2. 不能给根数据对象添加响应式属性，原因就是根数据对象的 Observer 实例收集不到依赖
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
@@ -261,53 +264,63 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     return val
   }
   if (!ob) {
+    // 如果 target 原本就不是响应式的，那么直接赋值即可
     target[key] = val
     return val
   }
+  // 将新添加的属性修改为响应式
   defineReactive(ob.value, key, val)
+  // 触发收集到的依赖
   ob.dep.notify()
+  // 返回 val
   return val
 }
 
-/**
- * Delete a property and trigger change if necessary.
- */
+// 删除属性，在需要的情况下，触发搜集到的依赖
 export function del (target: Array<any> | Object, key: any) {
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
-    warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
+    // 如果 target 是基础类型，那么报警告
+    warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target)}`)
   }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
+    // 当 target 是数组，并且 key 是有效的索引值时，splice能触发响应
     target.splice(key, 1)
     return
   }
-  const ob = (target: any).__ob__
+  const ob = (target).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
+    // 不能用于删除 vm 或 根数据上面的data
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid deleting properties on a Vue instance or its root $data ' +
       '- just set it to null.'
     )
     return
   }
+  // 如果key 不是 target 上面的属性，直接 return
   if (!hasOwn(target, key)) {
     return
   }
+  // 删除当前属性
   delete target[key]
+  // 如果不是响应式的，直接return
   if (!ob) {
     return
   }
+  // 如果是响应式的，那么触发收集到的依赖
   ob.dep.notify()
 }
 
-/**
- * Collect dependencies on array elements when the array is touched, since
- * we cannot intercept array element access like property getters.
- */
+// 给数组内部元素也添加上数组的依赖，这个我们就可以劫持数组内部元素的变化
+// 数组的索引是非响应式的，因为索引并不是“访问器属性”
 function dependArray (value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
+    // 获取每个元素的值
     e = value[i]
+    // 如果 拥有 __ob__ 那么说明 e 是 对象或数组，此时在 e.__ob__.dep 中对依赖进行收集
     e && e.__ob__ && e.__ob__.dep.depend()
+    // 如果 e 是数组，那么递归的 dependArray
     if (Array.isArray(e)) {
       dependArray(e)
     }
