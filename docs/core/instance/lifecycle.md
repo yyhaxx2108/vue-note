@@ -53,7 +53,9 @@ export function initLifecycle (vm: Component) {
   // $refs 为节点的引用
   vm.$refs = {}
 
+  // 渲染观察者
   vm._watcher = null
+  
   vm._inactive = null
   vm._directInactive = false
   vm._isMounted = false
@@ -148,18 +150,22 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// 挂载组件的函数，vm 是 组件 的实例，el 为挂载节点，hydrating为透传的参数
 export function mountComponent (
   vm: Component,
   el: ?Element,
   hydrating?: boolean
 ): Component {
+  // 先用 vm.$el 保存 el 的引用
   vm.$el = el
   if (!vm.$options.render) {
+    // 如果 vm.$options.render 不存在, 那么创建一个空的Node
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
-      /* istanbul ignore if */
+      // 如果在非生产环境下，将报警告
       if ((vm.$options.template && vm.$options.template.charAt(0) !== '#') ||
         vm.$options.el || el) {
+        // 如果有 template, 且template是#开头的，或者存在 vm.$options.el，此时应该在带编译的环境中运行
         warn(
           'You are using the runtime-only build of Vue where the template ' +
           'compiler is not available. Either pre-compile the templates into ' +
@@ -167,6 +173,7 @@ export function mountComponent (
           vm
         )
       } else {
+        // 否则直接报 边缘错误
         warn(
           'Failed to mount component: template or render function not defined.',
           vm
@@ -174,11 +181,13 @@ export function mountComponent (
       }
     }
   }
+  // 触发 beforeMount 回调
   callHook(vm, 'beforeMount')
 
+  // 下面代码是对 updateComponent 进行初始化
   let updateComponent
-  /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+    // 在非生产环境，对性能进行测试
     updateComponent = () => {
       const name = vm._name
       const id = vm._uid
@@ -186,24 +195,27 @@ export function mountComponent (
       const endTag = `vue-perf-end:${id}`
 
       mark(startTag)
+      // 通过 vm._render() 获取 vnode
       const vnode = vm._render()
       mark(endTag)
       measure(`vue ${name} render`, startTag, endTag)
 
       mark(startTag)
+      // 通过 vm._update() 更新 成真正的dom
       vm._update(vnode, hydrating)
       mark(endTag)
       measure(`vue ${name} patch`, startTag, endTag)
     }
   } else {
+    // updateComponent 是一个函数，把渲染函数生成的虚拟DOM渲染成真正的DOM
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
     }
   }
 
-  // we set this to vm._watcher inside the watcher's constructor
-  // since the watcher's initial patch may call $forceUpdate (e.g. inside child
-  // component's mounted hook), which relies on vm._watcher being already defined
+  // 创建一个渲染函数观察者，
+  // 这里表达式参数是一个函数，改函数里面有求值操作，用以收集依赖
+  // 第三个参数传入的是 noop 空函数
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted) {

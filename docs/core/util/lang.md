@@ -17,15 +17,17 @@ export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
   })
 }
 
-/**
- * Parse simple path.
- */
+// 不能是字母或数字或下划线或.或$,比如 / *
 const bailRE = /[^\w.$]/
+// 转化如 obj.a 这样的字符串，其返回值是一个函数
 export function parsePath (path: string): any {
   if (bailRE.test(path)) {
+    // 如果 path 中 含有 不是 字母或数字或下划线或.或$ 的字符串，那么直接返回 undefined
     return
   }
+  // 通过字符 . 分割 path 字符串产生数组，并且保存到 segments
   const segments = path.split('.')
+  // 返回一个函数，此函数会递归的访问 segments 里面的键值，并且把最底层那个值返回
   return function (obj) {
     for (let i = 0; i < segments.length; i++) {
       if (!obj) return

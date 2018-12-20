@@ -57,7 +57,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 
 export function initState (vm: Component) {
   // vm 添加一个属性 vm._watchers = []
-  // 其初始值是一个数组，这个数组将用来存储所有该组件实例的 watcher 对象
+  // 其初始值是一个数组，这个数组将用来存储所有该组件实例的 watcher 对象，即观察者
   vm._watchers = []
   // 定义了常量 opts，它是 vm.$options 的引用
   const opts = vm.$options
