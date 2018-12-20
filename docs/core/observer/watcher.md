@@ -86,10 +86,10 @@ export default class Watcher {
     this.dirty = this.lazy
 
     // 下面几个属性是用来避免收集重复依赖和移除无用的依赖
-    this.deps = []
-    this.newDeps = []
-    this.depIds = new Set()
-    this.newDepIds = new Set()
+    this.deps = []             // 保存着上一次求值过程中，收集到的dep
+    this.newDeps = []          // 保存着当前求值过程中，收集到的dep
+    this.depIds = new Set()    // 保存着上一次求值过程中，收集到的depId
+    this.newDepIds = new Set() // 保存着当前求值过程中，收集到的depId
 
     // 在非生产环境中会表达式用字符串的形式存到 this.expression 上
     this.expression = process.env.NODE_ENV !== 'production'
@@ -118,6 +118,7 @@ export default class Watcher {
       }
     }
     // 如果 this.lazy 为假，那么 this.value = undefined，否则直接调用 this.get()
+    // this.value 保存着被观察目标的值
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -125,15 +126,21 @@ export default class Watcher {
 
   // 对 getter 求值，并且重新获取依赖
   get () {
+    // 将当前 Watcher 赋值给 Dep.target
     pushTarget(this)
+    // 定义 value
     let value
+    // 读取当前 Watcher 上面到组件实例 vm
     const vm = this.vm
     try {
+      // 调用当前 getter 并且将返回值 赋值给 value
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
+        // 如果是用户自定义的 wather 中 获取值失败，那么抛出错误
         handleError(e, vm, `getter for watcher "${this.expression}"`)
       } else {
+        // 否则将错误往上一层抛
         throw e
       }
     } finally {
@@ -148,25 +155,28 @@ export default class Watcher {
     return value
   }
 
-  /**
-   * Add a dependency to this directive.
-   */
+  // 将一个dep实例添加到该watcher中，dep 是一个实例
   addDep (dep: Dep) {
+    // 缓存唯一标识id, 下面的步骤是为了避免收集重复的依赖
     const id = dep.id
+    // 如果 this.newDepIds.has(id)，那么说明该 wather 实例中有 dep，不用收集
+    // 如 {{test}}{{test}}
     if (!this.newDepIds.has(id)) {
+      // 将 dep 的 id add 到 this.newDepIds
       this.newDepIds.add(id)
+      // 将 dep psuh 到 this.newDeps
       this.newDeps.push(dep)
+      // 避免多次求值中搜集重复依赖
       if (!this.depIds.has(id)) {
         dep.addSub(this)
       }
     }
   }
 
-  /**
-   * Clean up for dependency collection.
-   */
+  // 清理收集到的依赖
   cleanupDeps () {
     let i = this.deps.length
+    // 如果 dep 中的元素在 newDep中，那么移除掉
     while (i--) {
       const dep = this.deps[i]
       if (!this.newDepIds.has(dep.id)) {
