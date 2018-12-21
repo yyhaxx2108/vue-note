@@ -149,7 +149,9 @@ export default class Watcher {
       if (this.deep) {
         traverse(value)
       }
+      // 获取到值以后，将当前 Wather 弹出
       popTarget()
+      // 重新整理 deps、depIds、newDeps、newDepIds
       this.cleanupDeps()
     }
     return value
@@ -176,63 +178,71 @@ export default class Watcher {
   // 清理收集到的依赖
   cleanupDeps () {
     let i = this.deps.length
-    // 如果 dep 中的元素在 newDep中，那么移除掉
+    // 如果之前的 wather 没有在新的dep队列里面，那么将其从变量所引用的闭包中删除掉
     while (i--) {
       const dep = this.deps[i]
       if (!this.newDepIds.has(dep.id)) {
         dep.removeSub(this)
       }
     }
+    // 缓存 this.depIds
     let tmp = this.depIds
+    // 将新的 newDepIds 赋值给旧的 depIds
     this.depIds = this.newDepIds
+    // 将新的 newDepIds 清空
     this.newDepIds = tmp
     this.newDepIds.clear()
+    // 缓存 this.deps
     tmp = this.deps
+    // 将新的 newDeps 赋值给旧的 deps
     this.deps = this.newDeps
+    // 将新的 newDeps 清空
     this.newDeps = tmp
     this.newDeps.length = 0
   }
 
-  /**
-   * Subscriber interface.
-   * Will be called when a dependency changes.
-   */
+  // 订阅接口，在依赖发生变化时会被调用
   update () {
-    /* istanbul ignore else */
     if (this.lazy) {
+      // 如果 this.lazy 那么将 this.dirty 设置为 true
       this.dirty = true
     } else if (this.sync) {
+      // 如果 this.sync 为真，那么说明是同步操作，立即执行 run 函数
       this.run()
     } else {
+      // 将其添入异步更新队列中，后面执行
       queueWatcher(this)
     }
   }
 
-  /**
-   * Scheduler job interface.
-   * Will be called by the scheduler.
-   */
+  // scheduler接口，scheduler 将被执行
   run () {
+    // 当观察者是否处于激活状态时执行
     if (this.active) {
+      // 执行 get，重新搜集依赖，并且将返回值缓存到 value 上
       const value = this.get()
+      // 判断 value 是否发生变化 或 value 是对象或 this.deep 为 true
+      // 渲染 watcher 将不会执行if里面的内容
       if (
         value !== this.value ||
-        // Deep watchers and watchers on Object/Arrays should fire even
-        // when the value is the same, because the value may
-        // have mutated.
         isObject(value) ||
         this.deep
       ) {
-        // set new value
+        // 缓存之前的 value
         const oldValue = this.value
+        // 将新的 value 赋值给 this.value
         this.value = value
+        // 判断是否为用户 watcher
         if (this.user) {
+          // 如果是用户 watcher，在try中执行用户传入的回调
           try {
+            // 该回调函数传入的参数分别是 实例对象、新的值、旧的值
             this.cb.call(this.vm, value, oldValue)
           } catch (e) {
             handleError(e, this.vm, `callback for watcher "${this.expression}"`)
           }
         } else {
+          // 直接执行回调
           this.cb.call(this.vm, value, oldValue)
         }
       }

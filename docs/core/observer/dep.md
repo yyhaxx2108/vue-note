@@ -18,7 +18,9 @@ export default class Dep {
   subs: Array<Watcher>;
 
   constructor () {
+    // dep 的唯一标识
     this.id = uid++
+    // 保存 Wather 的数组
     this.subs = []
   }
 
@@ -27,6 +29,7 @@ export default class Dep {
     this.subs.push(sub)
   }
 
+  // 将 watcher 从 this.subs 也就是变量引用的那个dep闭包中删除
   removeSub (sub: Watcher) {
     remove(this.subs, sub)
   }
@@ -40,14 +43,13 @@ export default class Dep {
   }
 
   notify () {
-    // stabilize the subscriber list first
+    // 复制当前数组
     const subs = this.subs.slice()
     if (process.env.NODE_ENV !== 'production' && !config.async) {
-      // subs aren't sorted in scheduler if not running async
-      // we need to sort them now to make sure they fire in correct
-      // order
+      // 在同步执行观察者时，我们需要先对 watcher 进行排序
       subs.sort((a, b) => a.id - b.id)
     }
+    // 遍历 wathcer，并且执行 wather 中的 update 方法
     for (let i = 0, l = subs.length; i < l; i++) {
       subs[i].update()
     }
@@ -68,6 +70,7 @@ export function pushTarget (target: ?Watcher) {
   Dep.target = target
 }
 
+// 将当前 Wathcer 的前一个值赋值给 Dep.target，同时将当前 Wather 从 targetStack 移除掉
 export function popTarget () {
   targetStack.pop()
   Dep.target = targetStack[targetStack.length - 1]
