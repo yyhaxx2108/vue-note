@@ -43,7 +43,7 @@ export default class Dep {
   }
 
   notify () {
-    // 复制当前数组
+    // 复制 subs 数组，subs里面存放的是 watcher 实例
     const subs = this.subs.slice()
     if (process.env.NODE_ENV !== 'production' && !config.async) {
       // 在同步执行观察者时，我们需要先对 watcher 进行排序

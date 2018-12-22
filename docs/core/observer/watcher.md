@@ -80,7 +80,7 @@ export default class Watcher {
     this.cb = cb
     // 观察者标识
     this.id = ++uid
-    // 是否是激活状态
+    // 设置为处于激活状态
     this.active = true
     // 只有计算属性的观察者实例对象的 this.dirty 属性的值才会为真
     this.dirty = this.lazy
@@ -157,7 +157,7 @@ export default class Watcher {
     return value
   }
 
-  // 将一个dep实例添加到该watcher中，dep 是一个实例
+  // 对 dep 实例进行检测，看其是否存在 dep 数组中，如果不存在那么 dep.addSub
   addDep (dep: Dep) {
     // 缓存唯一标识id, 下面的步骤是为了避免收集重复的依赖
     const id = dep.id

@@ -40,7 +40,6 @@ export default ({
   /**
    * Option merge strategies (used in core/util/options)
    */
-  // $flow-disable-line
   optionMergeStrategies: Object.create(null),
 
   /**
@@ -113,10 +112,7 @@ export default ({
    */
   mustUseProp: no,
 
-  /**
-   * Perform updates asynchronously. Intended to be used by Vue Test Utils
-   * This will significantly reduce performance if set to false.
-   */
+  // 执行异步更新，用于 Vue 的单元测试中，如果设置为false，将显著降低性能
   async: true,
 
   /**
