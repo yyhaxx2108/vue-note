@@ -198,17 +198,22 @@ export function getData (data: Function, vm: Component): any {
   }
 }
 
+// 用于 computed 创建 watcher
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
-  // $flow-disable-line
+  // 首先创建一个空对象，并且将该对象赋值给 vm._computedWatchers 和 watchers
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
+  // 判断是否为服务端渲染，计算属性只是 getter
   const isSSR = isServerRendering()
 
   for (const key in computed) {
+    // 缓存 computed[key] 到 userDef
     const userDef = computed[key]
+    // 如果 userDef 是方法，那么 getter 就是 userDef，否则 getter 为 userDef.get
     const getter = typeof userDef === 'function' ? userDef : userDef.get
+    // 在非生产环境中，不存在 getter 那么报警告
     if (process.env.NODE_ENV !== 'production' && getter == null) {
       warn(
         `Getter is missing for computed property "${key}".`,
@@ -217,7 +222,7 @@ function initComputed (vm: Component, computed: Object) {
     }
 
     if (!isSSR) {
-      // create internal watcher for the computed property.
+      // 在非服务端渲染中，创建一个内部监视器
       watchers[key] = new Watcher(
         vm,
         getter || noop,
@@ -226,9 +231,7 @@ function initComputed (vm: Component, computed: Object) {
       )
     }
 
-    // component-defined computed properties are already defined on the
-    // component prototype. We only need to define computed properties defined
-    // at instantiation here.
+    // 组件定义的计算属性已经在组件原型上定义，我们只需要在实例化组件时对其进行定义
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {

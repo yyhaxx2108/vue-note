@@ -144,8 +144,7 @@ export default class Watcher {
         throw e
       }
     } finally {
-      // "touch" every property so they are all tracked as
-      // dependencies for deep watching
+      // “触摸”每个属性，因此它们都作为依赖项进行跟踪，以便进行深入观察
       if (this.deep) {
         traverse(value)
       }
