@@ -268,21 +268,20 @@ export default class Watcher {
     }
   }
 
-  /**
-   * Remove self from all dependencies' subscriber list.
-   */
+  // 从订阅列表中将自身删除
   teardown () {
+    // 如果 this.active 为假，说明 Wathcer 未处于激活状态，不用进行操作
     if (this.active) {
-      // remove self from vm's watcher list
-      // this is a somewhat expensive operation so we skip it
-      // if the vm is being destroyed.
+      // 我们在vm实例销毁的时候不用进行下面操作，用以提高性能
       if (!this.vm._isBeingDestroyed) {
         remove(this.vm._watchers, this)
       }
+      // 将 wathcer 从 this.deps 中移除
       let i = this.deps.length
       while (i--) {
         this.deps[i].removeSub(this)
       }
+      // 将观察者对象的 active 设置为 false
       this.active = false
     }
   }
