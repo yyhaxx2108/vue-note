@@ -204,7 +204,7 @@ const computedWatcherOptions = { lazy: true }
 function initComputed (vm: Component, computed: Object) {
   // 首先创建一个空对象，并且将该对象赋值给 vm._computedWatchers 和 watchers
   const watchers = vm._computedWatchers = Object.create(null)
-  // computed properties are just getters during SSR
+
   // 判断是否为服务端渲染，计算属性只是 getter
   const isSSR = isServerRendering()
 
@@ -222,7 +222,7 @@ function initComputed (vm: Component, computed: Object) {
     }
 
     if (!isSSR) {
-      // 在非服务端渲染中，创建一个内部监视器
+      // 在非服务端渲染中，创建一个内部监视器, 计算属性观察者
       watchers[key] = new Watcher(
         vm,
         getter || noop,
@@ -231,10 +231,12 @@ function initComputed (vm: Component, computed: Object) {
       )
     }
 
-    // 组件定义的计算属性已经在组件原型上定义，我们只需要在实例化组件时对其进行定义
+    // 判断 vm 上面是否有 key
     if (!(key in vm)) {
+      // 如果 vm 上面没有定义，直接调用 defineComputed 将其定义好
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {
+      // 如果存在在 $data 或 $prop 上，抛出对应的警告
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
       } else if (vm.$options.props && key in vm.$options.props) {
@@ -244,16 +246,20 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
+// 该函数的作用就是通过 Object.defineProperty 函数在组件实例对象上定义与计算属性同名的组件实例属性
 export function defineComputed (
   target: any,
   key: string,
   userDef: Object | Function
 ) {
+  // 非服务端渲染的情况下计算属性才会缓存值
   const shouldCache = !isServerRendering()
+
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
       : createGetterInvoker(userDef)
+    // 如果 userDef 是函数，那么 set 为 noop 函数
     sharedPropertyDefinition.set = noop
   } else {
     sharedPropertyDefinition.get = userDef.get
@@ -263,6 +269,7 @@ export function defineComputed (
       : noop
     sharedPropertyDefinition.set = userDef.set || noop
   }
+  // 如果在非生产环境中，如果没有定义 set 方法，调用 set 报警告
   if (process.env.NODE_ENV !== 'production' &&
       sharedPropertyDefinition.set === noop) {
     sharedPropertyDefinition.set = function () {
