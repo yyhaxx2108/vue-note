@@ -248,18 +248,15 @@ export default class Watcher {
     }
   }
 
-  /**
-   * Evaluate the value of the watcher.
-   * This only gets called for lazy watchers.
-   */
+  // 求观察者的值，这个只有在 lazy watchers 中用到
   evaluate () {
+    // 求值，并且搜集依赖
     this.value = this.get()
+    // 将 dirty 设置为 false
     this.dirty = false
   }
 
-  /**
-   * Depend on all deps collected by this watcher.
-   */
+  // 搜集所有 deps
   depend () {
     let i = this.deps.length
     while (i--) {

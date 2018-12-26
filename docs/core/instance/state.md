@@ -254,14 +254,17 @@ export function defineComputed (
 ) {
   // 非服务端渲染的情况下计算属性才会缓存值
   const shouldCache = !isServerRendering()
-
+  
+  // 判断 userDef 是否为函数
   if (typeof userDef === 'function') {
+    // 如果 userDef 是函数，用该函数定义 sharedPropertyDefinition.get 
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
       : createGetterInvoker(userDef)
     // 如果 userDef 是函数，那么 set 为 noop 函数
     sharedPropertyDefinition.set = noop
   } else {
+    // 如果 userDef 不是函数，用该对象上的get 定义 sharedPropertyDefinition.get
     sharedPropertyDefinition.get = userDef.get
       ? shouldCache && userDef.cache !== false
         ? createComputedGetter(key)
@@ -282,14 +285,17 @@ export function defineComputed (
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+// 计算属性访问器属性，返回 computedGetter 函数
 function createComputedGetter (key) {
   return function computedGetter () {
+    // 读取计算 wathcer 数组里面缓存的 wather
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
       if (watcher.dirty) {
         watcher.evaluate()
       }
       if (Dep.target) {
+        // 如果 Dep.target 有值
         watcher.depend()
       }
       return watcher.value
@@ -297,6 +303,7 @@ function createComputedGetter (key) {
   }
 }
 
+// 如果是服务端渲染，返回的 computedGetter 只是调用 getter
 function createGetterInvoker(fn) {
   return function computedGetter () {
     return fn.call(this, this)
