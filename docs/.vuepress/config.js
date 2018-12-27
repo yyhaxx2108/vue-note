@@ -380,7 +380,8 @@ module.exports = {
       ],
       
       "/note/": [
-        "chapter1"
+        "chapter1",
+        "1"
       ]
     },
     nav: [

@@ -250,9 +250,9 @@ export default class Watcher {
 
   // 求观察者的值，这个只有在 lazy watchers 中用到
   evaluate () {
-    // 求值，并且搜集依赖
+    // 求值，并且为computed依赖的值收集依赖
     this.value = this.get()
-    // 将 dirty 设置为 false
+    // 将 dirty 设置为 false，说明 computed 已经求值成功
     this.dirty = false
   }
 

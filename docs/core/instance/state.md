@@ -201,6 +201,7 @@ export function getData (data: Function, vm: Component): any {
 // 用于 computed 创建 watcher
 const computedWatcherOptions = { lazy: true }
 
+// 初始化 computed
 function initComputed (vm: Component, computed: Object) {
   // 首先创建一个空对象，并且将该对象赋值给 vm._computedWatchers 和 watchers
   const watchers = vm._computedWatchers = Object.create(null)
@@ -282,6 +283,7 @@ export function defineComputed (
       )
     }
   }
+  // 在组件实例对象上定义与计算属性同名的组件实例属性
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
@@ -292,12 +294,14 @@ function createComputedGetter (key) {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
       if (watcher.dirty) {
+        // 给 watcher.value 求值，同时为 computed 所构成的属性，搜集依赖
         watcher.evaluate()
       }
       if (Dep.target) {
-        // 如果 Dep.target 有值
+        // 如果 Dep.target 有值，继续为 computed 所构成的属性，搜集依赖
         watcher.depend()
       }
+      // 返回 watcher.value 作为 computed 的值
       return watcher.value
     }
   }

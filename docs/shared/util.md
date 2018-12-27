@@ -1,6 +1,7 @@
 # util
 ```javascript
 
+// Object.freeze() 方法可以冻结一个对象
 export const emptyObject = Object.freeze({})
 
 // 判断给定变量是否是未定义，当变量值为 null时，也会认为其是未定义
@@ -34,21 +35,15 @@ export function isPrimitive (value: any): boolean %checks {
   )
 }
 
-/**
- * Quick object check - this is primarily used to tell
- * Objects from primitive values when we know the value
- * is a JSON-compliant type.
- */
+// 主要是为了区分原始值
 export function isObject (obj: mixed): boolean %checks {
   return obj !== null && typeof obj === 'object'
 }
 
-/**
- * Get the raw type string of a value, e.g., [object Object].
- */
+
 const _toString = Object.prototype.toString
 
-// 判断数据类型
+// 返回给定变量的原始类型字符串
 export function toRawType (value: any): string {
   return _toString.call(value).slice(8, -1)
 }
@@ -58,6 +53,7 @@ export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
 
+// 判读是否为正则表达式
 export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
 }
