@@ -46,7 +46,7 @@ export default class Dep {
     // 复制 subs 数组，subs里面存放的是 watcher 实例
     const subs = this.subs.slice()
     if (process.env.NODE_ENV !== 'production' && !config.async) {
-      // 在同步执行观察者时，我们需要先对 watcher 进行排序
+      // 在同步执行观察者时，我们需要先对 watcher 进行排序，用于保证更新的正确顺序
       subs.sort((a, b) => a.id - b.id)
     }
     // 遍历 wathcer，并且执行 wather 中的 update 方法
@@ -56,9 +56,7 @@ export default class Dep {
   }
 }
 
-// the current target watcher being evaluated.
-// this is globally unique because there could be only one
-// watcher being evaluated at any time.
+// 获取当前对wather，在全局中，当前的wather是唯一的
 Dep.target = null
 const targetStack = []
 

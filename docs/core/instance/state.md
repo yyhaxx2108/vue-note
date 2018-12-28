@@ -80,22 +80,32 @@ export function initState (vm: Component) {
   }
 }
 
+// 初始化 props，props经过规范化，会成为 props:{a: {type: String}} 这种形式
 function initProps (vm: Component, propsOptions: Object) {
+  // 首先用 propsData 保存 vm.$options.propsData 的引用
   const propsData = vm.$options.propsData || {}
+  // 定义一个空对象，并且将其保存到 vm._props 和 props 中
   const props = vm._props = {}
-  // cache prop keys so that future props updates can iterate using Array
-  // instead of dynamic object key enumeration.
+  // 定义一个空数组，用于缓存 props 的 keys 方便后面的遍历
   const keys = vm.$options._propKeys = []
+  // 如果 vm 没有 $parent，则表示 vm 是根组件实例
   const isRoot = !vm.$parent
-  // root instance props should be converted
+  // 非根组件实例，将 shouldObserve 转化为 false，关闭 observe 方法
+  // 其中 defineReactive 会调用 observe 方法
+  // 这里的目的是不将 props 转化成响应式数据
   if (!isRoot) {
     toggleObserving(false)
   }
+  // 遍历 propsOptions 对象
   for (const key in propsOptions) {
+    // 将 key push到 vm.$options._propKeys 数组中
     keys.push(key)
+    // 检验 props[key] 是否符合预期到类型，并且返回 props[key] 的默认值
     const value = validateProp(key, propsOptions, propsData, vm)
-    /* istanbul ignore else */
+
+    // 判断是否为非生产环境
     if (process.env.NODE_ENV !== 'production') {
+      // 如果在生产环境中，
       const hyphenatedKey = hyphenate(key)
       if (isReservedAttribute(hyphenatedKey) ||
           config.isReservedAttr(hyphenatedKey)) {
@@ -116,15 +126,17 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // 定义响应式到 props[key]=value
       defineReactive(props, key, value)
     }
-    // static props are already proxied on the component's prototype
-    // during Vue.extend(). We only need to proxy props defined at
-    // instantiation here.
+    // 在组件实例对象上定义与 props 同名的属性，
+    // 但其最终代理的值仍然是 vm._props 对象下定义的 props 数据
+
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
   }
+  // 执行完上面步骤之后，将 shouldObserve 重新转化为 true，打开 observe 方法，避免影响后面的代码
   toggleObserving(true)
 }
 
@@ -298,7 +310,7 @@ function createComputedGetter (key) {
         watcher.evaluate()
       }
       if (Dep.target) {
-        // 如果 Dep.target 有值，继续为 computed 所构成的属性，搜集依赖
+        // 如果 Dep.target 有值，说明存在读取值的观察者，为改观察者搜集依赖
         watcher.depend()
       }
       // 返回 watcher.value 作为 computed 的值

@@ -120,7 +120,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     !value._isVue
   ) {
     // 可以观测的条件是
-    // 1.shouldObserve 为 true
+    // 1.shouldObserve 为 true, 在 initProps 中，defineReactive 时，会将其设置会false
     // 2.不是服务端渲染
     // 3.是纯对象或者数组
     // 4.改对象是可以在上面添加新属性的，Object.preventExtensions，Object.seal 或 Object.freeze 都可以禁止添加属性

@@ -153,7 +153,7 @@ export function queueWatcher (watcher: Watcher) {
     // 将 flushSchedulerQueue 加入异步任务中
     if (!waiting) {
       waiting = true
-
+      // 在非生产环境下，且配置了 async 为false，那么所有观察者将同步执行
       if (process.env.NODE_ENV !== 'production' && !config.async) {
         flushSchedulerQueue()
         return
