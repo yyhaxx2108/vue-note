@@ -105,16 +105,18 @@ function initProps (vm: Component, propsOptions: Object) {
 
     // 判断是否为非生产环境
     if (process.env.NODE_ENV !== 'production') {
-      // 如果在生产环境中，
+      // 如果在生产环境中，将 prop 的名字转为连字符加小写的形式
       const hyphenatedKey = hyphenate(key)
-      if (isReservedAttribute(hyphenatedKey) ||
-          config.isReservedAttr(hyphenatedKey)) {
+      if (isReservedAttribute(hyphenatedKey) || config.isReservedAttr(hyphenatedKey)) {
+        // 判断 prop 的名字是否是保留的属性，如果是则抛出警告
         warn(
           `"${hyphenatedKey}" is a reserved attribute and cannot be used as component prop.`,
           vm
         )
       }
+      // 第四个参数是 setter
       defineReactive(props, key, value, () => {
+        // 不要直接修改 props 的值，因为即使修改了，用 computed 替代
         if (!isRoot && !isUpdatingChildComponent) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
@@ -131,7 +133,7 @@ function initProps (vm: Component, propsOptions: Object) {
     }
     // 在组件实例对象上定义与 props 同名的属性，
     // 但其最终代理的值仍然是 vm._props 对象下定义的 props 数据
-
+    // 如果，key in vm，说明 vm 是由vue.extend 生成类的实例，vue.extend，避免重复代理
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }

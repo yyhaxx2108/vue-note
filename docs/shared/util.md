@@ -107,9 +107,7 @@ export function makeMap (
 // 检查标签是否为slot 或 component
 export const isBuiltInTag = makeMap('slot,component', true)
 
-/**
- * Check if an attribute is a reserved attribute.
- */
+// 检查属性是否为保留属性
 export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is')
 
 // 将一个元素从数组中移除出去，返回被删除的元素

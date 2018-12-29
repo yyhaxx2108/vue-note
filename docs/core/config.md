@@ -84,10 +84,7 @@ export default ({
    */
   isReservedTag: no,
 
-  /**
-   * Check if an attribute is reserved so that it cannot be used as a component
-   * prop. This is platform-dependent and may be overwritten.
-   */
+  // 检查是否为保留属性，如果是保留属性，就不能将其作为组件的属性，这个取决与平台，可能被替代
   isReservedAttr: no,
 
   /**
