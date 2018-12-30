@@ -151,10 +151,9 @@ export const capitalize = cached((str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1)
 })
 
-/**
- * Hyphenate a camelCase string.
- */
+// 匹配大写字母，且该大写字母为非单词边界
 const hyphenateRE = /\B([A-Z])/g
+// 将驼峰转为连字符
 export const hyphenate = cached((str: string): string => {
   return str.replace(hyphenateRE, '-$1').toLowerCase()
 })
