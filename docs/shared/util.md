@@ -144,9 +144,7 @@ export const camelize = cached((str: string): string => {
   return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
 })
 
-/**
- * Capitalize a string.
- */
+// 将首字母转化为大写
 export const capitalize = cached((str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1)
 })

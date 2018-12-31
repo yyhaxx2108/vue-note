@@ -133,7 +133,7 @@ function initProps (vm: Component, propsOptions: Object) {
     }
     // 在组件实例对象上定义与 props 同名的属性，
     // 但其最终代理的值仍然是 vm._props 对象下定义的 props 数据
-    // 如果，key in vm，说明 vm 是由vue.extend 生成类的实例，vue.extend，避免重复代理
+    // 如果key in vm，说明 vm 是由vue.extend 生成类的实例，vue.extend，避免重复代理
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }

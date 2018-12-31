@@ -64,11 +64,13 @@ export function validateProp (
     // 还原 shouldObserve 到之前的状态
     toggleObserving(prevShouldObserve)
   }
+  // 在非生产环境中对 props 值类型进行验证
   if (
     process.env.NODE_ENV !== 'production' &&
-    // skip validation for weex recycle-list child component props
+    // 跳过WEEX回收列表子组件属性的验证
     !(__WEEX__ && isObject(value) && ('@binding' in value))
   ) {
+    // 完成校验工作
     assertProp(prop, key, value, vm, absent)
   }
   return value
@@ -112,9 +114,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
     : def
 }
 
-/**
- * Assert whether a prop is valid.
- */
+// 校验 prop 是否正确
 function assertProp (
   prop: PropOptions,
   name: string,
@@ -123,6 +123,7 @@ function assertProp (
   absent: boolean
 ) {
   if (prop.required && absent) {
+    // 如果 prop.required 但是没有传入 prop，那么抛出警告并且返回
     warn(
       'Missing required prop: "' + name + '"',
       vm
@@ -130,22 +131,34 @@ function assertProp (
     return
   }
   if (value == null && !prop.required) {
+    // 如果 value 为空，并且 prop 不是必须，直接返回，不必进行之后的校验
     return
   }
+  // 下面的代码用来做类型断言，首先将 prop.type 赋值给 type
   let type = prop.type
+  // valid 表示 type 是否校验成功，
+  // !type 表示开发者并没有定义 type，和 type === true 一起不需要进行校验
   let valid = !type || type === true
+  // 初始化一个空数组，并且赋值给 expectedTypes 常量
   const expectedTypes = []
+  // 只有当 type 存在的时候才进行类型校验
   if (type) {
     if (!Array.isArray(type)) {
+      // 如果 type 不是数组，组装一个 [type] 数组，并且赋值给 type
       type = [type]
     }
+    // 遍历 type，并且用 assertType 对其进行断言
     for (let i = 0; i < type.length && !valid; i++) {
+      // assertedType 函数会返回如 {assertedType.expectedType: 'String', valid: true}这样的结构
       const assertedType = assertType(value, type[i])
+      // 将 assertedType.expectedType push到 expectedTypes 数组中
       expectedTypes.push(assertedType.expectedType || '')
+      // 将 assertedType.valid 赋值给 valid，如果valid 为真，说明断言成功，将跳出循环
       valid = assertedType.valid
     }
   }
 
+  // 如果此时 valid 为假，则说明用户传入的数据不满足期待的类型，将抛出警告
   if (!valid) {
     warn(
       getInvalidTypeMessage(name, value, expectedTypes),
@@ -153,8 +166,11 @@ function assertProp (
     )
     return
   }
+  // 缓存自定义校验函数
   const validator = prop.validator
+  // 如果存在自定义校验，则进行校验
   if (validator) {
+    // 如果校验不过，报警告
     if (!validator(value)) {
       warn(
         'Invalid prop: custom validator check failed for prop "' + name + '".',
@@ -164,28 +180,40 @@ function assertProp (
   }
 }
 
+// 匹配字符串，String、Number、Boolean、Function、Symbol
 const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/
 
+// 断言数据类型
 function assertType (value: any, type: Function): {
   valid: boolean;
   expectedType: string;
 } {
+  // 定义一个变量 valid
   let valid
+  // 返回期望的数据类型字符串
   const expectedType = getType(type)
+  // 判断 expectedType 是否 String|Number|Boolean|Function|Symbol 中的一种
   if (simpleCheckRE.test(expectedType)) {
+    // 如果是，计算 value 的类型，并且保存到常量 t 上
     const t = typeof value
+    // 判断 t 是否和 expectedType的小写相等，并把结果保存到 valid 上
     valid = t === expectedType.toLowerCase()
-    // for primitive wrapper objects
+    // 如果不相等，但是 t 是基本包装对象, 如：new String('ddd')
     if (!valid && t === 'object') {
+      // 判断 value 是否为 type 的 实例，并且将结果保存到 valid 上
       valid = value instanceof type
     }
   } else if (expectedType === 'Object') {
+    // 如果 expectedType === 'Object'，那么判断 value 是否为纯对象，并且将结果保存到 valid 上
     valid = isPlainObject(value)
   } else if (expectedType === 'Array') {
+    // 如果 expectedType === 'Array'，那么判断 value 是否为数组，并且将结果保存到 valid 上
     valid = Array.isArray(value)
   } else {
+    // 判断 value 是否为 type 的 实例，并且将结果保存到 valid 上
     valid = value instanceof type
   }
+  // 将 valid 和 expectedType 封装成对象，并且返回
   return {
     valid,
     expectedType
@@ -221,6 +249,7 @@ function getTypeIndex (type, expectedTypes): number {
   return -1
 }
 
+// 校验失败的警告信息
 function getInvalidTypeMessage (name, value, expectedTypes) {
   let message = `Invalid prop: type check failed for prop "${name}".` +
     ` Expected ${expectedTypes.map(capitalize).join(', ')}`
