@@ -251,26 +251,32 @@ function getTypeIndex (type, expectedTypes): number {
 
 // 校验失败的警告信息
 function getInvalidTypeMessage (name, value, expectedTypes) {
+  // 首先定义失败的消息
   let message = `Invalid prop: type check failed for prop "${name}".` +
     ` Expected ${expectedTypes.map(capitalize).join(', ')}`
+  // 将第一个允许的值存到 expectedType 上
   const expectedType = expectedTypes[0]
+  // 获取传入值的类型
   const receivedType = toRawType(value)
+  // 将 value 转化成为 expectedType 类型的字符串形式
   const expectedValue = styleValue(value, expectedType)
+  // 将 value 转化成为 receivedValue 类型的字符串形式
   const receivedValue = styleValue(value, receivedType)
-  // check if we need to specify expected value
+  // 检查是否需要指定预期值
   if (expectedTypes.length === 1 &&
       isExplicable(expectedType) &&
       !isBoolean(expectedType, receivedType)) {
     message += ` with value ${expectedValue}`
   }
   message += `, got ${receivedType} `
-  // check if we need to specify received value
+  // 检查是否需要指定接收值
   if (isExplicable(receivedType)) {
     message += `with value ${receivedValue}.`
   }
   return message
 }
 
+// 将 value 转化成为 type 类型的字符串形式
 function styleValue (value, type) {
   if (type === 'String') {
     return `"${value}"`
@@ -281,11 +287,13 @@ function styleValue (value, type) {
   }
 }
 
+// 判断 value 是否为 'string', 'number', 'boolean' 中的一种
 function isExplicable (value) {
   const explicitTypes = ['string', 'number', 'boolean']
   return explicitTypes.some(elem => value.toLowerCase() === elem)
 }
 
+// 判断是否有 boolean 值
 function isBoolean (...args) {
   return args.some(elem => elem.toLowerCase() === 'boolean')
 }
