@@ -156,33 +156,28 @@ export const hyphenate = cached((str: string): string => {
   return str.replace(hyphenateRE, '-$1').toLowerCase()
 })
 
-/**
- * Simple bind polyfill for environments that do not support it,
- * e.g., PhantomJS 1.x. Technically, we don't need this anymore
- * since native bind is now performant enough in most browsers.
- * But removing it would mean breaking code that was able to run in
- * PhantomJS 1.x, so this must be kept for backward compatibility.
- */
-
-/* istanbul ignore next */
+// 像 PhantomJS 1.x 这样的环境中，不支持 bind。为了保持向后兼容性，使用polyfillBind
 function polyfillBind (fn: Function, ctx: Object): Function {
   function boundFn (a) {
+    // 保存 arguments 的长度
     const l = arguments.length
     return l
-      ? l > 1
-        ? fn.apply(ctx, arguments)
-        : fn.call(ctx, a)
-      : fn.call(ctx)
+      ? l > 1                         // 传入参数，判断参数长度是否大于 1
+        ? fn.apply(ctx, arguments)    // 如果参数大于1，使用 apply 方法传入参数数组
+        : fn.call(ctx, a)             // 如果参数等一1，使用call 方法传入字符串
+      : fn.call(ctx)                  // 如果没有传入参数，直接调用fn
   }
 
   boundFn._length = fn.length
   return boundFn
 }
 
+// 原生bind
 function nativeBind (fn: Function, ctx: Object): Function {
   return fn.bind(ctx)
 }
 
+// 返回 bind 后的函数
 export const bind = Function.prototype.bind
   ? nativeBind
   : polyfillBind
