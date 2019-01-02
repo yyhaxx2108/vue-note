@@ -11,6 +11,7 @@ import { initLifecycle, callHook } from './lifecycle'
 import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
 
+// 实例唯一标识
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {

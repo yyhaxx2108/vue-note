@@ -28,6 +28,7 @@ if (process.env.NODE_ENV !== 'production') {
     }
   }
 
+  // 提示函数
   tip = (msg, vm) => {
     if (hasConsole && (!config.silent)) {
       console.warn(`[Vue tip]: ${msg}` + (

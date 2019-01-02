@@ -80,8 +80,10 @@ Vue.prototype.$mount = function (
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
-
       // 通过 compileToFunctions 函数获取 render，staticRenderFns
+      // template 模版字符串, 
+      // 第二个参数为一些配置选项 shouldDecodeNewlines: ie 怪异模式兼容、shouldDecodeNewlinesForHref chrome怪异模式兼容
+      // delimiters 模版变量风格 comments 是否保留注释，this 为当前实例
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
         shouldDecodeNewlinesForHref,
@@ -124,5 +126,4 @@ function getOuterHTML (el: Element): string {
 Vue.compile = compileToFunctions
 
 export default Vue
-
 ```
