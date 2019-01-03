@@ -5,10 +5,14 @@ import { makeMap } from 'shared/util'
 
 // 是否为 html 保留的属性
 export const isReservedAttr = makeMap('style,class')
-
+// 绑定 value 的标签
 const acceptValue = makeMap('input,textarea,option,select,progress')
-// 是否必须有相应属性配对的标签
+// 检测一个属性在标签中是否要使用元素原生的 prop 进行绑定
 export const mustUseProp = (tag: string, type: ?string, attr: string): boolean => {
+  // input,textarea,option,select,progress 的 value 属于原生属性
+  // option 上的 selected 属于原生属性
+  // input 上的 checked 属于原生属性
+  // vedio 上的 muted 属于原生属性
   return (
     (attr === 'value' && acceptValue(tag)) && type !== 'button' ||
     (attr === 'selected' && tag === 'option') ||

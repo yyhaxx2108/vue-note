@@ -11,6 +11,8 @@ export function createCompilerCreator (baseCompile: Function): Function {
       template: string,
       options?: CompilerOptions
     ): CompiledResult {
+      // 以 baseOptions 为原型创建 finalOptions 对象，finalOptions是 baseCompile 的参数
+      // baseOptions 是 createCompiler 形参，来自于 src/platforms/web/compiler/index.js
       const finalOptions = Object.create(baseOptions)
       const errors = []
       const tips = []

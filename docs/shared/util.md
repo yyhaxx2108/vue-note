@@ -230,17 +230,14 @@ export function noop (a?: any, b?: any, c?: any) {}
  */
 export const no = (a?: any, b?: any, c?: any) => false
 
-/* eslint-enable no-unused-vars */
-
 /**
  * Return the same value.
  */
 export const identity = (_: any) => _
 
-/**
- * Generate a string containing static keys from compiler modules.
- */
+// 从编译器模块生成包含静态键的字符串。
 export function genStaticKeys (modules: Array<ModuleOptions>): string {
+  // 将 m.staticKeys 拍平到一个空数组，然后再用逗号平接成字符串
   return modules.reduce((keys, m) => {
     return keys.concat(m.staticKeys || [])
   }, []).join(',')

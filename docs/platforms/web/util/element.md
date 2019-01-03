@@ -32,6 +32,7 @@ export const isSVG = makeMap(
   true
 )
 
+// 是否是 pre 标签
 export const isPreTag = (tag: ?string): boolean => tag === 'pre'
 
 // 检查是否为原生的html标签或svg标签
