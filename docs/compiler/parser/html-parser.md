@@ -130,6 +130,7 @@ export function parseHTML (html, options) {
         // 将解析好的开始标签对象保存到 startTagMatch 上
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
+          // 如果存在 startTagMatch，用 handleStartTag 处理 startTagMatch
           handleStartTag(startTagMatch)
           if (shouldIgnoreFirstNewline(startTagMatch.tagName, html)) {
             advance(1)
@@ -250,9 +251,11 @@ export function parseHTML (html, options) {
   }
   // 处理 parseStartTag 后的结果
   function handleStartTag (match) {
+    // 保存 tagName
     const tagName = match.tagName
+    // 保存 unarySlash
     const unarySlash = match.unarySlash
-
+    // 如果 expectHTML 为 true
     if (expectHTML) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag)
@@ -262,27 +265,36 @@ export function parseHTML (html, options) {
       }
     }
 
+    // 判断 tag 是否为但标签
     const unary = isUnaryTag(tagName) || !!unarySlash
-
+    // attrs 上面属性的个数
     const l = match.attrs.length
+    // 根据属性长度，新建属性数组
     const attrs = new Array(l)
+    // 循环 l 次
     for (let i = 0; i < l; i++) {
+      // 读取当前标签
       const args = match.attrs[i]
+      // 将当前标签的值保存到 value
       const value = args[3] || args[4] || args[5] || ''
+      // 保存 shouldDecodeNewlines 方法
       const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
         ? options.shouldDecodeNewlinesForHref
         : options.shouldDecodeNewlines
+      // attr[i] 保存有 name、value 的对象
       attrs[i] = {
         name: args[1],
         value: decodeAttr(value, shouldDecodeNewlines)
       }
     }
-
+    // 如果不存在 ‘\’
     if (!unary) {
+      // 将 tag 解析后的对象 push 到 stack
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
+      // 将 tagName 保存到 lastTag
       lastTag = tagName
     }
-
+    // 如果存在 start 钩子，调用该钩子函数
     if (options.start) {
       options.start(tagName, attrs, unary, match.start, match.end)
     }
