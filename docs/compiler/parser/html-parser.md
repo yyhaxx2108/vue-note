@@ -116,13 +116,16 @@ export function parseHTML (html, options) {
         }
 
         // 判断是否是结束标签
+        // 匹配结束标签
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
-          // 如果是结束标签，更新 index
+          // 如果是结束标签，保存当前 index
           const curIndex = index
           // 前进 endTag 的长度
           advance(endTagMatch[0].length)
+          // 解析结束标签，endTagMatch[1] 为标签名，curIndex 为开始位置，index 为结束位置
           parseEndTag(endTagMatch[1], curIndex, index)
+          // 继续操作
           continue
         }
 
@@ -132,7 +135,9 @@ export function parseHTML (html, options) {
         if (startTagMatch) {
           // 如果存在 startTagMatch，用 handleStartTag 处理 startTagMatch
           handleStartTag(startTagMatch)
+          // 判断是否应该忽略第一个换行符号
           if (shouldIgnoreFirstNewline(startTagMatch.tagName, html)) {
+            // 如果应该忽略，那么前进1
             advance(1)
           }
           continue
@@ -300,43 +305,50 @@ export function parseHTML (html, options) {
     }
   }
 
-  // 解析结束标签
+  // 解析结束标签，参数分别是标签名，开始位置，结束位置
   function parseEndTag (tagName, start, end) {
     let pos, lowerCasedTagName
     if (start == null) start = index
     if (end == null) end = index
 
-    // Find the closest opened tag of the same type
+    // 查找最近的 tag 开标签
     if (tagName) {
+      // 将 tag 转为小写
       lowerCasedTagName = tagName.toLowerCase()
       for (pos = stack.length - 1; pos >= 0; pos--) {
+        // 循环查找 tag 开标签
         if (stack[pos].lowerCasedTag === lowerCasedTagName) {
+          // 如果找到跳出循环
           break
         }
       }
     } else {
-      // If no tag name is provided, clean shop
+      //如果没有传递 tagName，将 pos 赋值为 0
       pos = 0
     }
-
+    // 判断 pos 是否小于 0，如果 pos 小于 0，那么需要判断tag 是否单标签
     if (pos >= 0) {
-      // Close all the open elements, up the stack
+      // 如果 pos >= 0 为stack 里面所有tag之前所有未闭合的标签抛出警告
       for (let i = stack.length - 1; i >= pos; i--) {
         if (process.env.NODE_ENV !== 'production' &&
           (i > pos || !tagName) &&
           options.warn
         ) {
+          // 抛出警告，标签未闭合
           options.warn(
             `tag <${stack[i].tag}> has no matching end tag.`
           )
         }
+        // 如果存在 end 钩子函数
         if (options.end) {
+          // 调用 end，传入 当前标签，开始位置，和结束位置 
           options.end(stack[i].tag, start, end)
         }
       }
 
-      // Remove the open elements from the stack
+      // 将处理过的标签推出 stack 栈
       stack.length = pos
+      // 如果 stack 里面还有元素，将最上面元素保存到 lastTag 上
       lastTag = pos && stack[pos - 1].tag
     } else if (lowerCasedTagName === 'br') {
       if (options.start) {
