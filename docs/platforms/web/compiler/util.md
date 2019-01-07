@@ -14,8 +14,7 @@ export const canBeLeftOpenTag = makeMap(
   'colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source'
 )
 
-// HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
-// Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
+// 非段落型模型，与p标签有关
 export const isNonPhrasingTag = makeMap(
   'address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
   'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' +
