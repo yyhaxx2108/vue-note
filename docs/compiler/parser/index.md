@@ -20,19 +20,28 @@ import {
   pluckModuleFunction
 } from '../helpers'
 
+// 匹配 @ 或者 v-on 开始的正则表达式，即是否为监听事件的指令
 export const onRE = /^@|^v-on:/
+// 匹配 @ 或者 v- 或者 :开始的正则表达式，即是否为指令
 export const dirRE = /^v-|^@|^:/
+// 匹配 v-for 的属性值，并且保留 in 或者 of 前后的字符串
 export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
+// 匹配 v-for 迭代器的值，如 (v, k) of list 或者 (v, k, i) in obj
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
+// 匹配以 ( 开始， 或者 ) 结束的字符床
 const stripParensRE = /^\(|\)$/g
 
+// 匹配指令中书写的参数，如 v-on:click.stop
 const argRE = /:(.*)$/
+// 匹配 : 或者 v-bind 开头的字符串，用来检测一个标签属性是否动态绑定
 export const bindRE = /^:|^v-bind:/
+// 匹配修饰符 
 const modifierRE = /\.[^.]+/g
 
+// he 用于字符解码工作
 const decodeHTMLCached = cached(he.decode)
 
-// configurable state
+// 定义平台化变量
 export let warn: any
 let delimiters
 let transforms
@@ -44,6 +53,7 @@ let platformGetTagNamespace
 
 type Attr = { name: string; value: string };
 
+// 用来创建一个元素的描述对象
 export function createASTElement (
   tag: string,
   attrs: Array<Attr>,
@@ -79,7 +89,7 @@ export function parse (
 
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
-  // 声明 root 变量 
+  // 声明 root 变量，root 实际上就是ast
   let root
   let currentParent
   let inVPre = false
