@@ -644,17 +644,23 @@ function parseModifiers (name: string): Object | void {
   }
 }
 
+// 这里是将属性数组转化为属性字典对象
 function makeAttrsMap (attrs: Array<Object>): Object {
+  // 定义一个 map 常量
   const map = {}
+  // 遍历 attrs
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (
       process.env.NODE_ENV !== 'production' &&
       map[attrs[i].name] && !isIE && !isEdge
     ) {
+      // 在非 IE 环境下，属性值如果重复，报警告
       warn('duplicate attribute: ' + attrs[i].name)
     }
+    // 将 attrs[i].value 赋值给 map[attrs[i].name]，这里是将数组转化为字典对象
     map[attrs[i].name] = attrs[i].value
   }
+  // 将 map 常量返回
   return map
 }
 
