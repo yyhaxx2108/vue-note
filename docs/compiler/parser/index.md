@@ -77,25 +77,39 @@ export function parse (
   // 如果存在 options.warn 使用 options.warn 否则使用 baseWarn
   warn = options.warn || baseWarn
 
+  // 初始化了平台变量
+  // 判断该标签是否是 pre 标签
   platformIsPreTag = options.isPreTag || no
+  // 判断是否一个属性在标签中是否要使用元素对象原生的 prop 进行绑定
   platformMustUseProp = options.mustUseProp || no
+  // 获取元素(标签)的命名空间
   platformGetTagNamespace = options.getTagNamespace || no
-
+  // 筛选 options.modules 中的 transformNode 并且保存到 transforms 中
   transforms = pluckModuleFunction(options.modules, 'transformNode')
+  // 筛选 options.modules 中的 transformNode 并且保存到 preTransformNode 中
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
+  // 筛选 options.modules 中的 transformNode 并且保存到 postTransformNode 中
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
 
+  // 定义了 delimiters
   delimiters = options.delimiters
 
+  // 定义一个 stack 空数组
   const stack = []
+  // 是否解析空白字符
   const preserveWhitespace = options.preserveWhitespace !== false
   // 声明 root 变量，root 实际上就是ast
   let root
+  // 当前Parent
   let currentParent
+  // inVPre 变量用来标识当前解析的标签是否在拥有 v-pre 的标签之内
   let inVPre = false
+  // inPre 变量用来标识当前正在解析的标签是否在 <pre></pre> 标签之内
   let inPre = false
+  // 用于 warnOnce 函数
   let warned = false
 
+  // 警告一次
   function warnOnce (msg) {
     if (!warned) {
       warned = true
@@ -103,6 +117,7 @@ export function parse (
     }
   }
 
+  // 闭合标签
   function closeElement (element) {
     // check pre state
     if (element.pre) {
@@ -127,22 +142,26 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     start (tag, attrs, unary) {
-      // check namespace.
-      // inherit parent ns if there is one
+      // 检查命名空间, 如果存在父级n，则继承父级n
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag)
 
-      // handle IE svg bug
+      // 处理 IE 的bug
       if (isIE && ns === 'svg') {
         attrs = guardIESVGBug(attrs)
       }
 
+      // 通过 tag、attrs、currentParent，创建 ast 描述对象
       let element: ASTElement = createASTElement(tag, attrs, currentParent)
+      // 如果存在 ns，将 element.ns 赋值为 ns
       if (ns) {
         element.ns = ns
       }
 
+      // 如果 element 为禁止标签，且不是服务端渲染
       if (isForbiddenTag(element) && !isServerRendering()) {
+        // 将 forbidden 设置为 true
         element.forbidden = true
+        // 抛出警告
         process.env.NODE_ENV !== 'production' && warn(
           'Templates should only be responsible for mapping the state to the ' +
           'UI. Avoid placing tags with side-effects in your templates, such as ' +
@@ -150,8 +169,9 @@ export function parse (
         )
       }
 
-      // apply pre-transforms
+      // 遍历 preTransforms，并且调用，将结果返回给 element
       for (let i = 0; i < preTransforms.length; i++) {
+        // element 当前元素描述对象，options 为编译器选项
         element = preTransforms[i](element, options) || element
       }
 
@@ -175,14 +195,18 @@ export function parse (
         processElement(element, options)
       }
 
+      // 检测模版跟元素是否符合要求
       function checkRootConstraints (el) {
+        // 在非生产环境中，只能有一个根节点
         if (process.env.NODE_ENV !== 'production') {
+          // 如果 el 是 slot 或者是 template 将不能用作根元素
           if (el.tag === 'slot' || el.tag === 'template') {
             warnOnce(
               `Cannot use <${el.tag}> as component root element because it may ` +
               'contain multiple nodes.'
             )
           }
+          // 如果 el 上有 v-for 不能用来作根元素
           if (el.attrsMap.hasOwnProperty('v-for')) {
             warnOnce(
               'Cannot use v-for on stateful component root element because ' +
@@ -192,19 +216,26 @@ export function parse (
         }
       }
 
-      // tree management
+      // 生成 ast 树
       if (!root) {
+        // 如果当前不存在 root，将 element 赋值给 root
         root = element
+        // 检查 root 是否合法
         checkRootConstraints(root)
       } else if (!stack.length) {
-        // allow root elements with v-if, v-else-if and v-else
+        // 如果已经存在了 root，但是当前堆栈为空，则需要判断是否存在v-else-if 和 v-else
+        // v-if、v-else-if 和 v-else 是通过 processIf 解析得到的
         if (root.if && (element.elseif || element.else)) {
+          // 如果 root 里面存在 if，且 element 存在 v-else-if 和 v-else
+          // 判断 element作为 root 是否合法
           checkRootConstraints(element)
+          // 将 element的 elseif 表达式和元素组成的对象 push 到 root.ifConditions 中
           addIfCondition(root, {
             exp: element.elseif,
             block: element
           })
         } else if (process.env.NODE_ENV !== 'production') {
+          // 如果已经存在了 root，且当前堆栈为空，且不存在 if、else 相关逻辑，说明不只存在一个根节点，报警告
           warnOnce(
             `Component template should contain exactly one root element. ` +
             `If you are using v-if on multiple elements, ` +
@@ -212,22 +243,36 @@ export function parse (
           )
         }
       }
+      // 如果存在 currentParent，并且当前元素不是禁止元素
       if (currentParent && !element.forbidden) {
         if (element.elseif || element.else) {
+          // 如果存在 element.elseif 或 element.else，将该对象添加到 element.if中
           processIfConditions(element, currentParent)
-        } else if (element.slotScope) { // scoped slot
+        } else if (element.slotScope) {
+          // 如果存在 element.slotScope
+          // 将 currentParent.plain 设置成false
           currentParent.plain = false
+          // 将 name 赋值为 element.slotTarget 或 default
           const name = element.slotTarget || '"default"'
+          // 将 element 存到 currentParent.scopedSlots 中
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         } else {
+          // 将当前元素 push 到 currentParent.children
           currentParent.children.push(element)
+          // 将当前元素的 parent 设置成为 currentParent
           element.parent = currentParent
         }
       }
+      // 判断 unary 是否存在
       if (!unary) {
+        // 如果不存在 unary，说明当前 element 不是自闭合元素，
+        // 将 element 赋值给 currentParent
         currentParent = element
+        // 将 element push 到 stack 中
         stack.push(element)
       } else {
+        // 如果存在 unary，说明当前 element 是自闭合元素，
+        // 闭合当前标签
         closeElement(element)
       }
     },
@@ -428,14 +473,19 @@ function processIf (el) {
   }
 }
 
+// 将 else、else-if 节点对象添加到前一个兄弟节点中的 if 节点的 chilren 中 
 function processIfConditions (el, parent) {
+  // 寻找前一个兄弟节点
   const prev = findPrevElement(parent.children)
   if (prev && prev.if) {
+    // 如果有前一个兄弟节点，且此节点存在 if 指令
+    // 将此节点及其描述对象添加到前一个兄弟节点的 ifConditions 数组中
     addIfCondition(prev, {
       exp: el.elseif,
       block: el
     })
   } else if (process.env.NODE_ENV !== 'production') {
+    // 否则在非生产环境中报警告
     warn(
       `v-${el.elseif ? ('else-if="' + el.elseif + '"') : 'else'} ` +
       `used on element <${el.tag}> without corresponding v-if.`
@@ -443,12 +493,18 @@ function processIfConditions (el, parent) {
   }
 }
 
+// 寻找前一个元素节点，该函数只用在 processIfConditions 中
 function findPrevElement (children: Array<any>): ASTElement | void {
+  // 缓存 chilren 的长度，用于遍历
   let i = children.length
+  // 遍历 chilren
   while (i--) {
+    // 找到第一个元素节点，且判断其type
     if (children[i].type === 1) {
+      // 如果 type === 1，则返回该元素
       return children[i]
     } else {
+      // 如果 type !==1, 且不是空字符串，报警告
       if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ') {
         warn(
           `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
@@ -460,10 +516,13 @@ function findPrevElement (children: Array<any>): ASTElement | void {
   }
 }
 
+// 将 else 或 else-if 节点和表达式的对象 push 到 el.ifConditions 中
 export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
+  // 如果 el.ifConditions 不存在，先将 el.ifConditions 初始化成空数组
   if (!el.ifConditions) {
     el.ifConditions = []
   }
+  // 将 condition 对象 push 到 el.ifConditions 中
   el.ifConditions.push(condition)
 }
 
@@ -669,6 +728,7 @@ function isTextTag (el): boolean {
   return el.tag === 'script' || el.tag === 'style'
 }
 
+// 判断是否为禁止标签，即 style 或 script
 function isForbiddenTag (el): boolean {
   return (
     el.tag === 'style' ||
@@ -682,16 +742,23 @@ function isForbiddenTag (el): boolean {
 const ieNSBug = /^xmlns:NS\d+/
 const ieNSPrefix = /^NS\d+:/
 
-/* istanbul ignore next */
+// 处理 IE 中 SVG 属性的 bug
 function guardIESVGBug (attrs) {
+  // 定义一个空对象
   const res = []
+  // 遍历 attrs
   for (let i = 0; i < attrs.length; i++) {
+    // 缓存 attr
     const attr = attrs[i]
+    // 如果 attr.name 不能正则匹配 xmlns:NS
     if (!ieNSBug.test(attr.name)) {
+      // 将 attr.name 中 /^NS\d+:/ 替换成空
       attr.name = attr.name.replace(ieNSPrefix, '')
+      // 将 attr push 到 res数组
       res.push(attr)
     }
   }
+  // 返回 res
   return res
 }
 
