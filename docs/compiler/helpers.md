@@ -9,7 +9,7 @@ export function baseWarn (msg: string) {
   console.error(`[Vue compiler]: ${msg}`)
 }
 
-// 第一个参数中"采摘"出函数名字与第二个参数所指定字符串相同的函数，并将它们组成一个数组
+// 第一个参数中筛选出函数名字与第二个参数所指定字符串相同的函数，并将它们组成一个数组
 export function pluckModuleFunction<F: Function> (
   modules: ?Array<Object>,
   key: string
@@ -142,28 +142,34 @@ export function getBindingAttr (
   }
 }
 
-// note: this only removes the attr from the Array (attrsList) so that it
-// doesn't get processed by processAttrs.
-// By default it does NOT remove it from the map (attrsMap) because the map is
-// needed during codegen.
+// 从 attrsList 中将 attr 为 name 的元素删除，并且返回
 export function getAndRemoveAttr (
   el: ASTElement,
   name: string,
   removeFromMap?: boolean
 ): ?string {
+  // 定义 val
   let val
+  // 如果 el.attrsMap[name] 存在，从 attrsList 中找到 attr 为 name 的元素，并且赋值给val，然后删除
   if ((val = el.attrsMap[name]) != null) {
+    // 保存 attrsList 的引用
     const list = el.attrsList
+    // 遍历 attrsList
     for (let i = 0, l = list.length; i < l; i++) {
       if (list[i].name === name) {
+        // 如果找到，将其删掉
         list.splice(i, 1)
+        // 跳出循环
         break
       }
     }
   }
+  // 如果传入了 removeFromMap 且为真
   if (removeFromMap) {
+    // 将其从 attrsMap 删掉
     delete el.attrsMap[name]
   }
+  // 返回 val
   return val
 }
 

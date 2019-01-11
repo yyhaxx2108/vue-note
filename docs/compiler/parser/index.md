@@ -175,19 +175,30 @@ export function parse (
         element = preTransforms[i](element, options) || element
       }
 
+      // 如果 inVPre 为 false，首先处理 element 中的 pre 标签
+      // 如果 inVPre 为 true，说明后面都在 v-pre 环境中，编译器会跳过该指令标签以及其包含的子标签的编译
       if (!inVPre) {
+        // 调用 processPre 对 attr 中 pre 进行处理
         processPre(element)
         if (element.pre) {
+          // 如果 element.pre，将 inVPre 设置为 true
           inVPre = true
         }
       }
+      // 判断当前标签是否为 pre 标签
       if (platformIsPreTag(element.tag)) {
+        // 如果当前标签为 pre，将 inVPre 设置为 true
         inPre = true
       }
+      // 判断 inVPre 是否为 true，即 当前标签是否在 pre 环境下
+      // <pre> 标签会对其包含的 html 字符实体进行解码
+      // <pre> 标签会保留 html 字符串编写时的空白
       if (inVPre) {
+        // 对其自身和其子标签的 attr 进行原生化处理
         processRawAttrs(element)
       } else if (!element.processed) {
-        // structural directives
+        // 如果 element.processed 为 false，说明该标签没有处理过
+        // 处理 for 指令
         processFor(element)
         processIf(element)
         processOnce(element)
@@ -346,24 +357,35 @@ export function parse (
   return root
 }
 
+// 解析 Pre
 function processPre (el) {
+  // 如果在 el 中有 v-pre， 那么将其从 el.attrlist 中删除掉
   if (getAndRemoveAttr(el, 'v-pre') != null) {
+    // 将 el.pre 赋值为 true
     el.pre = true
   }
 }
 
+// 将元素所有属性当作元素属性处理，该函数只会在 inPre 环境下调用
 function processRawAttrs (el) {
+  // 缓存 el.attrsList 的长度到 l
   const l = el.attrsList.length
+  // 如果存在 l
   if (l) {
+    // 构造一个长度为 l 的空数组，并且保存到 el.attrs 和 attrs 上
     const attrs = el.attrs = new Array(l)
+    // 循环 l 次
     for (let i = 0; i < l; i++) {
+      // 将包含有当前 el.attr.name 和序列化后的 el.attr.value 的对象保存到 el.attrs[i] 上
       attrs[i] = {
         name: el.attrsList[i].name,
+        // JSON.stringify 是为了将 el.attrsList[i].value 当作字符串处理
         value: JSON.stringify(el.attrsList[i].value)
       }
     }
   } else if (!el.pre) {
-    // non root node in pre blocks with no attributes
+    // 如果即不存在 attr 又不是 pre 标签，那么说明该标签是 pre 下的子标签
+    // 将 el.plain 赋值为 true，即纯标签
     el.plain = true
   }
 }
