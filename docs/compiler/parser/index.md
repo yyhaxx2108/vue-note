@@ -197,7 +197,7 @@ export function parse (
         // 对其自身和其子标签的 attr 进行原生化处理
         processRawAttrs(element)
       } else if (!element.processed) {
-        // 如果 element.processed 为 false，说明该标签没有处理过
+        // 如果 element.processed 为 false，说明该标签没有处理过, 该属性在 preTransforms 时加上的
         // 处理 for 指令
         processFor(element)
         processIf(element)
@@ -436,13 +436,20 @@ function processRef (el) {
   }
 }
 
+// 处理 v-for 指令
 export function processFor (el: ASTElement) {
+  // 定义 exp
   let exp
+  // 如果存在 v-for 指令，将 attr 中 v-for 的值赋予 exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
+    // 调用 parseFor 解析 exp 并且将结果保存到 res
     const res = parseFor(exp)
+    // 判断 res 是否存在
     if (res) {
+      // 如果 res 存在，将 res 扩展到 el 对象上
       extend(el, res)
     } else if (process.env.NODE_ENV !== 'production') {
+      // 如果 res 不存在，说明 v-for 表达式有错误，报警告
       warn(
         `Invalid v-for expression: ${exp}`
       )
@@ -457,22 +464,36 @@ type ForParseResult = {
   iterator2?: string;
 };
 
+// 解析 v-for 表达式
 export function parseFor (exp: string): ?ForParseResult {
+  // 匹配 forAliasRE 并且将结果保存到 inMatch 中
   const inMatch = exp.match(forAliasRE)
+  // 如果 inMatch 为 null, 说明没有匹配到，直接返回
   if (!inMatch) return
+  // 定义 res 空对象
   const res = {}
+  // 将需要遍历的值保存到 res.for 上
   res.for = inMatch[2].trim()
+  // 去除掉 alias 上面的括号
   const alias = inMatch[1].trim().replace(stripParensRE, '')
+  // 匹配 forIteratorRE 并且保存到 iteratorMatch
+  // 如 obj, key, index 匹配后的结果将是 [', key, index', 'key', 'index']
   const iteratorMatch = alias.match(forIteratorRE)
+  // 判断是否存在 iteratorMatch
   if (iteratorMatch) {
+    // 保存 alias
     res.alias = alias.replace(forIteratorRE, '').trim()
+    // 保存第一个 iterator 的名字
     res.iterator1 = iteratorMatch[1].trim()
     if (iteratorMatch[2]) {
+      // 如果存在第二个 iterator， 保存第二个 iterator 的名字
       res.iterator2 = iteratorMatch[2].trim()
     }
   } else {
+    // 如果不存在，直接将 alias 保存到 res.alias 上
     res.alias = alias
   }
+  // 将 res 对象返回
   return res
 }
 
