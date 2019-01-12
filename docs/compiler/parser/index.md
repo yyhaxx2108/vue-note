@@ -198,11 +198,13 @@ export function parse (
         processRawAttrs(element)
       } else if (!element.processed) {
         // 如果 element.processed 为 false，说明该标签没有处理过, 该属性在 preTransforms 时加上的
-        // 处理 for 指令
+        // 处理 v-for 指令
         processFor(element)
+        // 处理 v-if 指令
         processIf(element)
+        // 处理 v-once 指令
         processOnce(element)
-        // element-scope stuff
+        // 处理其他属性
         processElement(element, options)
       }
 
@@ -391,6 +393,7 @@ function processRawAttrs (el) {
 }
 
 export function processElement (element: ASTElement, options: CompilerOptions) {
+  // 处理 key 
   processKey(element)
 
   // determine whether this is a plain element after
@@ -406,17 +409,26 @@ export function processElement (element: ASTElement, options: CompilerOptions) {
   processAttrs(element)
 }
 
+// 处理 key
 function processKey (el) {
+  // 获取 key 的表达式
   const exp = getBindingAttr(el, 'key')
+  // 如果存在 exp 表达式
   if (exp) {
     if (process.env.NODE_ENV !== 'production') {
+      // template 标签不能有 key
       if (el.tag === 'template') {
         warn(`<template> cannot be keyed. Place the key on real elements instead.`)
       }
+      // 如果 el 存在循环
       if (el.for) {
+        // 获取 el 的迭代器表达式
         const iterator = el.iterator2 || el.iterator1
+        // 获取 el 的父元素
         const parent = el.parent
+        // 如果存在 iterator 并且 iterator 和 key 的表达式一样，并且父亲元素是 transition-group
         if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
+          // 报警告，在transition-group 的 chilren 中不要使用 index 作为 key
           warn(
             `Do not use v-for index as key on <transtion-group> children, ` +
             `this is the same as not using keys.`
@@ -424,6 +436,7 @@ function processKey (el) {
         }
       }
     }
+    // 将 el.key 赋值为 exp
     el.key = exp
   }
 }
@@ -497,19 +510,27 @@ export function parseFor (exp: string): ?ForParseResult {
   return res
 }
 
+// 处理 v-if 指令
 function processIf (el) {
+  // 获取 v-if 指令表达式
   const exp = getAndRemoveAttr(el, 'v-if')
+  // 判断 v-if 指令表示式是否存在
   if (exp) {
+    // 如果 exp 存在，首先将其值保存到 el.if 上
     el.if = exp
+    // 在 el.ifcondition数组中加上 { exp: exp, block: el } 对象
     addIfCondition(el, {
       exp: exp,
       block: el
     })
   } else {
+    // 如果存在 v-else 指令，将 el.else 设置为 true
     if (getAndRemoveAttr(el, 'v-else') != null) {
       el.else = true
     }
+    // 判读是否存在 v-else-if 指令
     const elseif = getAndRemoveAttr(el, 'v-else-if')
+    // 如果存在 elseif，将 elseif 的值保存到 el.elseif 上
     if (elseif) {
       el.elseif = elseif
     }
@@ -569,9 +590,13 @@ export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
   el.ifConditions.push(condition)
 }
 
+// 解析 v-once
 function processOnce (el) {
+  // 获取 v-once
   const once = getAndRemoveAttr(el, 'v-once')
+  // 如果存在 once
   if (once != null) {
+    // 将 el.once 设置为true
     el.once = true
   }
 }
@@ -590,7 +615,6 @@ function processSlot (el) {
     let slotScope
     if (el.tag === 'template') {
       slotScope = getAndRemoveAttr(el, 'scope')
-      /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && slotScope) {
         warn(
           `the "scope" attribute for scoped slots have been deprecated and ` +
@@ -602,7 +626,6 @@ function processSlot (el) {
       }
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
-      /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
         warn(
           `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +

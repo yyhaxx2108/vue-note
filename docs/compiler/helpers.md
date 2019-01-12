@@ -124,18 +124,24 @@ export function addHandler (
   el.plain = false
 }
 
+// 获取动态 attr
 export function getBindingAttr (
   el: ASTElement,
   name: string,
   getStatic?: boolean
 ): ?string {
+  // 获取动态标签描述，以‘:’或 ‘v-bind’ 开始的 attr
   const dynamicValue =
     getAndRemoveAttr(el, ':' + name) ||
     getAndRemoveAttr(el, 'v-bind:' + name)
+  // 如果存在 dynamicValue，说明是动态属性
   if (dynamicValue != null) {
+    // 调用 parseFilters 方法，解析动态变量，并且将结果返回
     return parseFilters(dynamicValue)
   } else if (getStatic !== false) {
+    // 如果不是动态属性，也没有传入值为 false 的 getStatic，获取 name 标签 的值
     const staticValue = getAndRemoveAttr(el, name)
+    // 如果存在 staticValue，将 staticValue JSON.stringify 后返回
     if (staticValue != null) {
       return JSON.stringify(staticValue)
     }
