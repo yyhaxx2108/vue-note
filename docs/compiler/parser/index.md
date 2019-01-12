@@ -398,6 +398,7 @@ export function processElement (element: ASTElement, options: CompilerOptions) {
 
   // determine whether this is a plain element after
   // removing structural attributes
+  // 判读该标签是否是纯标签，即没有 key 和 结构化以外的属性(v-if, v-for, v-onces)
   element.plain = !element.key && !element.attrsList.length
 
   processRef(element)

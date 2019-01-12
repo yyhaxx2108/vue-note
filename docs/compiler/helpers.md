@@ -136,13 +136,14 @@ export function getBindingAttr (
     getAndRemoveAttr(el, 'v-bind:' + name)
   // 如果存在 dynamicValue，说明是动态属性
   if (dynamicValue != null) {
-    // 调用 parseFilters 方法，解析动态变量，并且将结果返回
+    // 调用 parseFilters 方法，解析动态变量过滤器，并且将结果返回
     return parseFilters(dynamicValue)
   } else if (getStatic !== false) {
     // 如果不是动态属性，也没有传入值为 false 的 getStatic，获取 name 标签 的值
     const staticValue = getAndRemoveAttr(el, name)
-    // 如果存在 staticValue，将 staticValue JSON.stringify 后返回
+    // 如果存在 staticValue
     if (staticValue != null) {
+      // 将 staticValue JSON.stringify 后返回
       return JSON.stringify(staticValue)
     }
   }
