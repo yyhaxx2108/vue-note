@@ -400,8 +400,10 @@ export function processElement (element: ASTElement, options: CompilerOptions) {
   // removing structural attributes
   // 判读该标签是否是纯标签，即没有 key 和 结构化以外的属性(v-if, v-for, v-onces)
   element.plain = !element.key && !element.attrsList.length
-
+  
+  // 解析 ref 属性
   processRef(element)
+  // 处理作用域插槽
   processSlot(element)
   processComponent(element)
   for (let i = 0; i < transforms.length; i++) {
@@ -442,10 +444,15 @@ function processKey (el) {
   }
 }
 
+// 解析 ref 属性
 function processRef (el) {
+  // 获取 ref 属性值
   const ref = getBindingAttr(el, 'ref')
+  // 如果存在 ref
   if (ref) {
+    // 将 ref 赋值到 el.ref 
     el.ref = ref
+    // 检查当前 el 是否在 for 循环中
     el.refInFor = checkInFor(el)
   }
 }
@@ -602,9 +609,13 @@ function processOnce (el) {
   }
 }
 
+// 处理作用域插槽
 function processSlot (el) {
+  // 判断 tag 是否为 slot
   if (el.tag === 'slot') {
+    // 如果 tag 为 slot，首先获取 slot 标签上面的 name
     el.slotName = getBindingAttr(el, 'name')
+    // 如果 slot 上面存在 key，报警告，因为 slot 是抽象的，可能会被多个元素替换，不存在唯一索引
     if (process.env.NODE_ENV !== 'production' && el.key) {
       warn(
         `\`key\` does not work on <slot> because slots are abstract outlets ` +
@@ -613,9 +624,13 @@ function processSlot (el) {
       )
     }
   } else {
+    // 如果 tag 不是 slot，先初始化 slotScope
     let slotScope
+    // 判断 tag 是不是 template
     if (el.tag === 'template') {
+      // 如果 tag 是 template，首先获取 scope 保存到 slotScope 上
       slotScope = getAndRemoveAttr(el, 'scope')
+      // 如果存在 slotScope，报警告，因为 template 上面 slot 被 slot-scope 替代了
       if (process.env.NODE_ENV !== 'production' && slotScope) {
         warn(
           `the "scope" attribute for scoped slots have been deprecated and ` +
@@ -625,9 +640,14 @@ function processSlot (el) {
           true
         )
       }
+      // 将 slotScope 或 slot-scope 上面的值赋予 el.slotScope
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+      // 如果 tag 不是 template，首先将 slot-scope 赋值给 slotScope
+      // 如果 slot-scope 确实存在，判断是否在 v-for 循环中
       if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
+        // 如果在 v-for 循环中，报警告，在 v-for 中使用 slot-scope 不清楚，正确的做法是在template中使用 slot-scope
+        // v-for 具有更高的优先级
         warn(
           `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
           `(v-for takes higher priority). Use a wrapper <template> for the ` +
@@ -635,13 +655,17 @@ function processSlot (el) {
           true
         )
       }
+      // 将 slotScope 赋值给 el.slotScope
       el.slotScope = slotScope
     }
+    // 获取当前节点的 slot 属性
     const slotTarget = getBindingAttr(el, 'slot')
+    // 如果存在 slot 属性
     if (slotTarget) {
+      // 如果 slotTarget 为字符串‘""’，则将 "default" 字符串赋值给 el.slotTarget 否则将 slotTarget 复制给 el.slotTarget
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
-      // preserve slot as an attribute for native shadow DOM compat
-      // only for non-scoped slots.
+      // 处理 shadow DOM 中的 slot 属性
+      // 在不是 template 节点，且不存在 el.slotScope 的情况下，将 slot 保留成原生标签
       if (el.tag !== 'template' && !el.slotScope) {
         addAttr(el, 'slot', slotTarget)
       }
@@ -750,14 +774,19 @@ function processAttrs (el) {
   }
 }
 
+// 检查 el 是否在 for 循环中
 function checkInFor (el: ASTElement): boolean {
+  // 初始化 parent 为自身
   let parent = el
+  // 递归寻找 parent
   while (parent) {
+    // 如果在 parent 中存在 for 返回 true
     if (parent.for !== undefined) {
       return true
     }
     parent = parent.parent
   }
+  // 如果在祖先中不存在 for 返回false
   return false
 }
 

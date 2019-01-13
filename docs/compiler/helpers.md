@@ -25,8 +25,11 @@ export function addProp (el: ASTElement, name: string, value: string) {
   el.plain = false
 }
 
+// 添加原生标签
 export function addAttr (el: ASTElement, name: string, value: any) {
+  // 向 el.attrs 数组中添加 { name, value }
   (el.attrs || (el.attrs = [])).push({ name, value })
+  // 将 el.plain 设置成为 false
   el.plain = false
 }
 
