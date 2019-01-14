@@ -405,10 +405,14 @@ export function processElement (element: ASTElement, options: CompilerOptions) {
   processRef(element)
   // 处理作用域插槽
   processSlot(element)
+  // 处理组件 is/inline-template
   processComponent(element)
+  // 遍历 transforms
   for (let i = 0; i < transforms.length; i++) {
+    // 调用 transform 并且将其返回
     element = transforms[i](element, options) || element
   }
+  // 处理 el.attrsList 剩余属性
   processAttrs(element)
 }
 
@@ -673,52 +677,79 @@ function processSlot (el) {
   }
 }
 
+// 处理 is/inline-template
 function processComponent (el) {
+  // 定义 binding 变量，用来保存 is 属性值
   let binding
+  // 获取 is 属性，并且保存到 binding
   if ((binding = getBindingAttr(el, 'is'))) {
+    // 如果存在 binding，将 binding 赋值到 el.component 上
     el.component = binding
   }
+  // 如果存在 inline-template
   if (getAndRemoveAttr(el, 'inline-template') != null) {
+    // 将 el.inlineTemplate 设置为 true
     el.inlineTemplate = true
   }
 }
 
+// 处理 el.attrsList
 function processAttrs (el) {
+  // 将 el.attrsList 保存到 list 上面
   const list = el.attrsList
   let i, l, name, rawName, value, modifiers, isProp
+  // 遍历 el.attrsList
   for (i = 0, l = list.length; i < l; i++) {
+    // 保存 list[i].name
     name = rawName = list[i].name
+    // 保存 list[i].value
     value = list[i].value
+    // 判断 name 是否为动态属性，动态属性包括 v-/:/@
     if (dirRE.test(name)) {
-      // mark element as dynamic
+      // 如果包含动态属性，将 el.hasBindings 设置为 true, 标识当前元素为动态元素
       el.hasBindings = true
-      // modifiers
+      // 解析修饰器，modifiers 为对象，其中存了以修饰器为键，以 true 为值的元素
       modifiers = parseModifiers(name)
+      // 如果没有修饰器 modifiers 为 undefined
       if (modifiers) {
+        // 将 modifierRE 替换掉
         name = name.replace(modifierRE, '')
       }
-      if (bindRE.test(name)) { // v-bind
+      // 如果是 v-bind/: 的动态属性
+      if (bindRE.test(name)) {
+        // 将前面标识动态属性的 v-bind/: 去掉，然后保存到 name 上
         name = name.replace(bindRE, '')
+        // 解析过滤器，并且把处理好的字符串保存到 value 上
         value = parseFilters(value)
+        // 将 isProp 设置为 false，isProp 变量标识该绑定属性是否为原生属性
         isProp = false
         if (
           process.env.NODE_ENV !== 'production' &&
           value.trim().length === 0
         ) {
+          // 如果 value 为空，报警告，动态绑定的值必须有 value
           warn(
             `The value for a v-bind expression cannot be empty. Found in "v-bind:${name}"`
           )
         }
+        // 如果存在修饰器
         if (modifiers) {
           if (modifiers.prop) {
+            // 如果修饰器上面有 prop，说明该属性被指定为原生属性，将 prop 设置为 true
             isProp = true
+            // 将 name 进行 camelize 处理
             name = camelize(name)
+            // 如果 name 为 innerHtml，将其修改为 innerHTML
             if (name === 'innerHtml') name = 'innerHTML'
           }
           if (modifiers.camel) {
+            // 如果修饰器上面有 camel，将 name 进行 camelize 处理
+            // 浏览器会将标签的属性全部读取成小写字母，如 viewBox 会读成 viewbox，正确的写法是 view-box.camel
             name = camelize(name)
           }
           if (modifiers.sync) {
+            // 如果有修饰器 sync，调用 addHandler 函数
+            // aa.async 等价于 @update:aa=this.vlue=val
             addHandler(
               el,
               `update:${camelize(name)}`,
@@ -790,11 +821,16 @@ function checkInFor (el: ASTElement): boolean {
   return false
 }
 
+// 解析修饰器
 function parseModifiers (name: string): Object | void {
+  // 正则匹配修饰器，将匹配到到结果保存到 match
   const match = name.match(modifierRE)
   if (match) {
+    // 如果匹配到修饰器，初始化 ret 对象
     const ret = {}
+    // 遍历 match，并且将‘.’截取掉后的字符串作为健值，保存到 ret 对象上，其值为 true
     match.forEach(m => { ret[m.slice(1)] = true })
+    // 返回 ret
     return ret
   }
 }

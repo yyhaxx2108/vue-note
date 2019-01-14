@@ -20,12 +20,15 @@ export function pluckModuleFunction<F: Function> (
     : []
 }
 
+// 添加原生属性
 export function addProp (el: ASTElement, name: string, value: string) {
+  // 向 el.props 数组中添加 { name, value }，el.props 为原生dom 的属性
   (el.props || (el.props = [])).push({ name, value })
+  // 将 el.plain 设置成为 false
   el.plain = false
 }
 
-// 添加原生标签
+// 添加属性
 export function addAttr (el: ASTElement, name: string, value: any) {
   // 向 el.attrs 数组中添加 { name, value }
   (el.attrs || (el.attrs = [])).push({ name, value })
