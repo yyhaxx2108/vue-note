@@ -748,8 +748,10 @@ function processAttrs (el) {
             name = camelize(name)
           }
           if (modifiers.sync) {
-            // 如果有修饰器 sync，调用 addHandler 函数
+            // 如果有修饰器 sync，调用 addHandler 函数，
+            // addHandler 是将事件名称与该事件的侦听函数添加到元素描述对象的 el.events 属性或 el.nativeEvents 属性中
             // aa.async 等价于 @update:aa=this.vlue=val
+            // genAssignmentCode(value, `$event`) 事件发生时候的回调函数
             addHandler(
               el,
               `update:${camelize(name)}`,
@@ -757,31 +759,43 @@ function processAttrs (el) {
             )
           }
         }
+        // 如果 isProp 变量为真，则说明该绑定的属性是原生DOM对象的属性
+        // el.component 为假，表示没有使用 is 属性，并且标签上的属性需要使用原生属性绑定
         if (isProp || (
           !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
         )) {
+          // 如果满足上面的要求，将属性添加为原生属性
           addProp(el, name, value)
         } else {
+          // 如果不满足上面的要求，将属性添加为属性
           addAttr(el, name, value)
         }
-      } else if (onRE.test(name)) { // v-on
+      } else if (onRE.test(name)) { 
+        // 解析 v-on 指令，首先将 onRE 替换成空
         name = name.replace(onRE, '')
+        // 将 name 事件添加到 event 数组中
         addHandler(el, name, value, modifiers, false, warn)
-      } else { // normal directives
+      } else {
+        // 处理其他的指令，首先将 v-、: @ 去掉
         name = name.replace(dirRE, '')
-        // parse arg
+        // 解析参数
         const argMatch = name.match(argRE)
+        // 将匹配到的参数保存到 arg 上面
         const arg = argMatch && argMatch[1]
+        // 如果存在 arg
         if (arg) {
+          // 将 arg 前面的字符串作为 name
           name = name.slice(0, -(arg.length + 1))
         }
+        // 添加指令
         addDirective(el, name, rawName, value, arg, modifiers)
+        // 如果是 v-model 指令
         if (process.env.NODE_ENV !== 'production' && name === 'model') {
           checkForAliasModel(el, value)
         }
       }
     } else {
-      // literal attribute
+      // 字面意义的属性
       if (process.env.NODE_ENV !== 'production') {
         const res = parseText(value, delimiters)
         if (res) {
@@ -895,8 +909,14 @@ function guardIESVGBug (attrs) {
 }
 
 function checkForAliasModel (el, value) {
+  // 将 el 保存到 _el
   let _el = el
+  // 遍历 el 的祖先节点
   while (_el) {
+    // 如果节点上存在着 for 或者 alias 将报警告
+    // 您正在将v-model直接绑定到v-for迭代别名。
+    // 这将无法修改v-for源数组，因为写入别名就像修改函数局部变量一样。
+    // 请考虑使用对象数组，而在对象属性上使用v-model。
     if (_el.for && _el.alias === value) {
       warn(
         `<${el.tag} v-model="${value}">: ` +
@@ -906,6 +926,7 @@ function checkForAliasModel (el, value) {
         `Consider using an array of objects and use v-model on an object property instead.`
       )
     }
+    // 将 _el 替换成 _el.parent，开始遍历
     _el = _el.parent
   }
 }

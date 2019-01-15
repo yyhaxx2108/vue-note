@@ -50,10 +50,13 @@ export function addDirective (
   arg: ?string,
   modifiers: ?ASTModifiers
 ) {
+  // 将 { name, rawName, value, arg, modifiers } 添加到 el.directives 数组中
   (el.directives || (el.directives = [])).push({ name, rawName, value, arg, modifiers })
+  // 将 el.plain 设置为 false
   el.plain = false
 }
 
+// 添加事件
 export function addHandler (
   el: ASTElement,
   name: string,
@@ -62,71 +65,93 @@ export function addHandler (
   important?: boolean,
   warn?: Function
 ) {
+  // 如果不存在 modifiers，则将其设置为空对象
   modifiers = modifiers || emptyObject
-  // warn prevent and passive modifier
-  /* istanbul ignore if */
+  // 如果既存在 prevent 又存在 passive，将抛出警告
   if (
     process.env.NODE_ENV !== 'production' && warn &&
     modifiers.prevent && modifiers.passive
   ) {
+    // passive 是告诉浏览器不要阻止默认行为
     warn(
       'passive and prevent can\'t be used together. ' +
       'Passive handler can\'t prevent default event.'
     )
   }
 
-  // normalize click.right and click.middle since they don't actually fire
-  // this is technically browser-specific, but at least for now browsers are
-  // the only target envs that have right/middle clicks.
+  // 在点击事件中
   if (name === 'click') {
+    // 如果有右键修饰器
     if (modifiers.right) {
+      // 将时间名称赋值成为 contextmenu
       name = 'contextmenu'
+      // 删除右键修饰器
       delete modifiers.right
     } else if (modifiers.middle) {
+      // 如果有中建修饰器，直接将事件名称赋值成 mouseup
       name = 'mouseup'
     }
   }
 
-  // check capture modifier
+  // 如果有捕获修饰器
   if (modifiers.capture) {
+    // 删除捕获修饰器
     delete modifiers.capture
-    name = '!' + name // mark the event as captured
+    // 同时在事件名称前面加上‘!’
+    name = '!' + name 
   }
+  // 如果有 once 修饰器
   if (modifiers.once) {
+    // 删除 once 修饰器
     delete modifiers.once
-    name = '~' + name // mark the event as once
+    // 在事件名称前面加上 ‘～’
+    name = '~' + name
   }
-  /* istanbul ignore if */
+  // 如果有 passive 修饰器
   if (modifiers.passive) {
+    // 删除 passive 修饰器
     delete modifiers.passive
-    name = '&' + name // mark the event as passive
+    // 在事件名称前面加上 ‘&’
+    name = '&' + name
   }
 
+  // 定义事件
   let events
+  // 判断是否存在 natvie 修饰器
   if (modifiers.native) {
+    // 如果有 native 修饰器
+    // 删除 native 修饰器
     delete modifiers.native
+    // 如果 el 上存在 nativeEvents，将其赋值给 events，如果不存在，将空对象赋值到 el.nativeEvents 和 events上
     events = el.nativeEvents || (el.nativeEvents = {})
   } else {
+    // 如果没有 native 修饰器，将 el.events 赋值到 events 上
     events = el.events || (el.events = {})
   }
 
+  // 定义一个新的事件对象，其 value 为 value.trim()
   const newHandler: any = {
     value: value.trim()
   }
+  // 如果此时 modifiers 不是空对象
   if (modifiers !== emptyObject) {
+    // 在 newHandler 对象上加上 modifiers
     newHandler.modifiers = modifiers
   }
 
+  // 将 events[name] 保存到 handlers 上
   const handlers = events[name]
-  /* istanbul ignore if */
   if (Array.isArray(handlers)) {
+    // 如果 handlers 是数组，如果存在 important，将 newHandlers 添加到 handlers 数组前面，否则添加到 handlers 后面
     important ? handlers.unshift(newHandler) : handlers.push(newHandler)
   } else if (handlers) {
+    // 如果 handlers 不是数组，则将 newHandler 和 handlers 拼接成数组，important 决定其顺序
     events[name] = important ? [newHandler, handlers] : [handlers, newHandler]
   } else {
+    // 如果之前就不存在，直接将 newHandler 赋值到 events[name] 上
     events[name] = newHandler
   }
-
+  // 然后将 el.plain 修改成 false
   el.plain = false
 }
 
