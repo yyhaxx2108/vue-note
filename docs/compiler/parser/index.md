@@ -795,9 +795,11 @@ function processAttrs (el) {
         }
       }
     } else {
-      // 字面意义的属性
+      // 非指令属性，id，width 等
       if (process.env.NODE_ENV !== 'production') {
+        // 解析字面量表述式，并且保存到 res 上
         const res = parseText(value, delimiters)
+        // 如果存在字变量表示的变量，报警告。
         if (res) {
           warn(
             `${name}="${value}": ` +
@@ -807,9 +809,9 @@ function processAttrs (el) {
           )
         }
       }
+      // 在 el.attrsList 上添加值为 JSON.stringify(value) 的 name
       addAttr(el, name, JSON.stringify(value))
-      // #6887 firefox doesn't update muted state if set via attribute
-      // even immediately after element creation
+      // 处理 fireFox 中，muted 相关的 bug
       if (!el.component &&
           name === 'muted' &&
           platformMustUseProp(el.tag, el.attrsMap.type, name)) {

@@ -7,6 +7,7 @@ import { parseFilters } from './filter-parser'
 const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g
 const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 
+// 根据自定义的字变量配置字变量表达式
 const buildRegex = cached(delimiters => {
   const open = delimiters[0].replace(regexEscapeRE, '\\$&')
   const close = delimiters[1].replace(regexEscapeRE, '\\$&')
@@ -18,10 +19,12 @@ type TextParseResult = {
   tokens: Array<string | { '@binding': string }>
 }
 
+// 解析子面表达式
 export function parseText (
   text: string,
   delimiters?: [string, string]
 ): TextParseResult | void {
+  // 匹配字符变量，
   const tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE
   if (!tagRE.test(text)) {
     return
