@@ -26,13 +26,19 @@ export function parseText (
 ): TextParseResult | void {
   // 匹配字符变量，
   const tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE
+  // 如果不能匹配字面量，直接返回
   if (!tagRE.test(text)) {
     return
   }
+  // 定义一个 tokens
   const tokens = []
+  // 定义一个 rawTokens
   const rawTokens = []
+  // 将 lastIndex 和 tagRE.lastIndex 设置为 0
   let lastIndex = tagRE.lastIndex = 0
+  // 定义 match, index, tokenValue
   let match, index, tokenValue
+  // 正则解析 text
   while ((match = tagRE.exec(text))) {
     index = match.index
     // push text token

@@ -8,8 +8,11 @@ import {
   baseWarn
 } from 'compiler/helpers'
 
+// 中序处理
 function transformNode (el: ASTElement, options: CompilerOptions) {
+  // 缓存 warn
   const warn = options.warn || baseWarn
+  // 获取 class 的值
   const staticClass = getAndRemoveAttr(el, 'class')
   if (process.env.NODE_ENV !== 'production' && staticClass) {
     const res = parseText(staticClass, options.delimiters)

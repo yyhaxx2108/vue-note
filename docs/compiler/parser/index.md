@@ -409,7 +409,7 @@ export function processElement (element: ASTElement, options: CompilerOptions) {
   processComponent(element)
   // 遍历 transforms
   for (let i = 0; i < transforms.length; i++) {
-    // 调用 transform 并且将其返回
+    // 调用 transform 并且将其返回， transforms 对 class 和 style 进行处理
     element = transforms[i](element, options) || element
   }
   // 处理 el.attrsList 剩余属性
