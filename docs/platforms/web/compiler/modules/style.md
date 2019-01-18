@@ -9,13 +9,18 @@ import {
   baseWarn
 } from 'compiler/helpers'
 
+// 中序处理style
 function transformNode (el: ASTElement, options: CompilerOptions) {
+  // 缓存警告函数
   const warn = options.warn || baseWarn
+  // 获取静态的 style
   const staticStyle = getAndRemoveAttr(el, 'style')
+  // 如果存在 staticStyle
   if (staticStyle) {
-    /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production') {
+      // 解析 ‘{{}}’ 字符串
       const res = parseText(staticStyle, options.delimiters)
+      // 如果存在 res 报警告
       if (res) {
         warn(
           `style="${staticStyle}": ` +
@@ -25,6 +30,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
         )
       }
     }
+    // 将 staticStyle 进行 parseStyleText，然后在序列化放到 el.staticStyle 中
     el.staticStyle = JSON.stringify(parseStyleText(staticStyle))
   }
 
