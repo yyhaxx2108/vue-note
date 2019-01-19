@@ -2,17 +2,26 @@
 ```javascript
 import { cached, extend, toObject } from 'shared/util'
 
+// 解析 style 字符串值
 export const parseStyleText = cached(function (cssText) {
   // 设置一个 res 空数组
   const res = {}
+  // 匹配‘;’, 该‘;’ 后面不能跟 ‘)’, 除非之前有 ‘(’
+  // 如 background: url(test.com?amp;);,只匹配后面那个 ‘;’
   const listDelimiter = /;(?![^(]*\))/g
+  // 匹配冒号
   const propertyDelimiter = /:(.+)/
+  // 先通过‘;’将 style 字符串分割成数组，然后通过 ‘:’ 将其保存到 res 对象中
   cssText.split(listDelimiter).forEach(function (item) {
+    // 如果存在 style
     if (item) {
+      // 通过 ‘:’ 将其分割成数组，并且保存到 tmp 中
       const tmp = item.split(propertyDelimiter)
+      // 如果该数组存在元素，将其转化成键值队保存到 res 中
       tmp.length > 1 && (res[tmp[0].trim()] = tmp[1].trim())
     }
   })
+  // 返回 res
   return res
 })
 

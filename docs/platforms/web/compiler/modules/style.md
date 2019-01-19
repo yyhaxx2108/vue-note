@@ -33,9 +33,11 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
     // 将 staticStyle 进行 parseStyleText，然后在序列化放到 el.staticStyle 中
     el.staticStyle = JSON.stringify(parseStyleText(staticStyle))
   }
-
-  const styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
+  // 获取 style 的动态绑定
+  const styleBinding = getBindingAttr(el, 'style', false )
+  // 如果存在 styleBinding
   if (styleBinding) {
+    // 将其保存到 el.styleBinding 上
     el.styleBinding = styleBinding
   }
 }
