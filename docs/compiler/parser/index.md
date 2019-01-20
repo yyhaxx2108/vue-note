@@ -119,14 +119,15 @@ export function parse (
 
   // 闭合标签
   function closeElement (element) {
-    // check pre state
+    // 检查是否在 pre 里面，如果在，将 inVPre 设置为 false
     if (element.pre) {
       inVPre = false
     }
+    // 检查是否在 pre 里面，如果在，将 inVPre 设置为 false
     if (platformIsPreTag(element.tag)) {
       inPre = false
     }
-    // apply post-transforms
+    // 进行后置处理
     for (let i = 0; i < postTransforms.length; i++) {
       postTransforms[i](element, options)
     }
@@ -290,6 +291,7 @@ export function parse (
       }
     },
 
+    // 对结束标签进行处理
     end () {
       // remove trailing whitespace
       const element = stack[stack.length - 1]
@@ -303,36 +305,51 @@ export function parse (
       closeElement(element)
     },
 
+    // 处理字符串
     chars (text: string) {
+      // 如果不存在 currentParent
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
+          // 如果 text 与 template 相同
           if (text === template) {
+            // 报警告，文本节点应该在根标签中
             warnOnce(
               'Component template requires a root element, rather than just text.'
             )
           } else if ((text = text.trim())) {
+            // 如果 如果 text 与 template 不相同
+            // 报警告，不在 root 标签中将会被忽略
             warnOnce(
               `text "${text}" outside root element will be ignored.`
             )
           }
         }
+        // 直接返回
         return
       }
-      // IE textarea placeholder bug
+      // 处理 IE 的 placeholder 的bug
       if (isIE &&
         currentParent.tag === 'textarea' &&
         currentParent.attrsMap.placeholder === text
       ) {
+        // 如果是在 IE 中，并且当前parent标签是 textarea，并且当前 parent 标签的 placeholder 和 text 相同
+        // 直接返回
         return
       }
+      // 将 currentParent.children 的引用保存到 children 上
       const children = currentParent.children
+      // 如果 inPre 为真或者 text不为空时，如果父节点不是文本标签，对 text 进行 decodeHTML 操作
+      // 如果 inPre 为假并且 text为空时，如果传入了 preserveWhitespace 并且有子节点，text为 ‘ ’,否则为 ‘’
       text = inPre || text.trim()
         ? isTextTag(currentParent) ? text : decodeHTMLCached(text)
-        // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && children.length ? ' ' : ''
+      // 如果存在 text
       if (text) {
+        // 定义 res
         let res
+        // 不在 pre 环境下，当前文本节点不是空字符，且解析了当前节点
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
+          // 将type、expression、tokens、text组装成对象保存到 chilren 中
           children.push({
             type: 2,
             expression: res.expression,
@@ -340,6 +357,7 @@ export function parse (
             text
           })
         } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
+          // 纯文本type 为 3
           children.push({
             type: 3,
             text
@@ -347,7 +365,9 @@ export function parse (
         }
       }
     },
+    // 对注释标签的处理
     comment (text: string) {
+      // 将type 改为 3，isComment 改为 true，然后 push 到 children 中
       currentParent.children.push({
         type: 3,
         text,
