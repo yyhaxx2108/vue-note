@@ -293,15 +293,20 @@ export function parse (
 
     // 对结束标签进行处理
     end () {
-      // remove trailing whitespace
+      // 删除尾随空格
+      // 获取 stack 堆顶
       const element = stack[stack.length - 1]
+      // 获取最后一个 children 元素
       const lastNode = element.children[element.children.length - 1]
+      // 如果最后一个子元素的 type 为 3，并且最后一个子元素为空字符串，并且不在 pre 里面，弹出当前子元素
       if (lastNode && lastNode.type === 3 && lastNode.text === ' ' && !inPre) {
         element.children.pop()
       }
-      // pop stack
+      // 删除堆顶元素
       stack.length -= 1
+      // 将 stack 中接下来的元素赋值给 currentParent
       currentParent = stack[stack.length - 1]
+      // 关闭当前标签
       closeElement(element)
     },
 

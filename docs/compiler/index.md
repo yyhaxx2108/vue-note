@@ -14,7 +14,9 @@ export const createCompiler = createCompilerCreator(function baseCompile (
 ): CompiledResult {
   // 生成抽象语法树
   const ast = parse(template.trim(), options)
+  // 如果没有指明不要标记静态节点
   if (options.optimize !== false) {
+    // 标记静态节点，包括根节点，和所有子节点
     optimize(ast, options)
   }
   // 将抽象语法树转化成平台代码
