@@ -42,14 +42,21 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   }
 }
 
+// 生成 style 相关字符串
 function genData (el: ASTElement): string {
+  // 声明一个空字符串，保存到data上
   let data = ''
+  // 如果存在 el.staticStyle
   if (el.staticStyle) {
+    // 将 `staticStyle:${el.staticStyle},` 添加到 data 上
     data += `staticStyle:${el.staticStyle},`
   }
+  // 如果存在 el.styleBinding
   if (el.styleBinding) {
+    / 将 `style:(${el.styleBinding}),` 添加到 data 上
     data += `style:(${el.styleBinding}),`
   }
+  // 将 data 返回
   return data
 }
 

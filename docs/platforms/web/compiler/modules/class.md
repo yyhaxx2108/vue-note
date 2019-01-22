@@ -42,14 +42,21 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   }
 }
 
+// 生成class字符串
 function genData (el: ASTElement): string {
+  // 声明空字符串保存到 data 上
   let data = ''
+  // 如果存在 el.staticClass
   if (el.staticClass) {
+    // 将 `staticClass:${el.staticClass},` 添加到 data 上
     data += `staticClass:${el.staticClass},`
   }
+  // 如果存在 el.classBinding
   if (el.classBinding) {
+    // 将 `class:${el.classBinding},` 添加到 data 上
     data += `class:${el.classBinding},`
   }
+  // 将处理好的 data 返回
   return data
 }
 
