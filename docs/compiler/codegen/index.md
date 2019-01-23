@@ -75,8 +75,13 @@ export function genElement (el: ASTElement, state: CodegenState): string {
   
   // 对 el 是否静态或者存在 for、if 等进行判断
   if (el.staticRoot && !el.staticProcessed) {
+    // 如果 el 是纯静态根元素, 即自身和子元素都不会变，
+    // 并且 el.staticProcessed 为false，即没有进行过 genStatic 处理
+    // 调用genStatic 方法，并且将其值 _m 函数字符串返回
     return genStatic(el, state)
   } else if (el.once && !el.onceProcessed) {
+    // 如果存在 v-once 并且没有经过 genOnce 处理，
+    // 调用 genOnce 进行处理，如果不同时存在 v-if、for 等指令就返回 genStatic() 的值
     return genOnce(el, state)
   } else if (el.for && !el.forProcessed) {
     return genFor(el, state)
@@ -116,18 +121,25 @@ export function genElement (el: ASTElement, state: CodegenState): string {
   }
 }
 
-// hoist static sub-trees out
+// 提取静态子树，该函数会往 staticRenderFns push 一个 _c 函数，并且返回一个 _m 函数
 function genStatic (el: ASTElement, state: CodegenState): string {
+  // 将 el.staticProcessed 设置为 true
   el.staticProcessed = true
-  // Some elements (templates) need to behave differently inside of a v-pre
-  // node.  All pre nodes are static roots, so we can use this as a location to
-  // wrap a state change and reset it upon exiting the pre node.
+  // 在 v-pre 标签中，一些元素需要表现得不同。所有的 pre 节点都是静态根节点，因此我们可以把此用作
+  // 包装状态变化的容器，并且在存在的 pre 上重置他
+  // 将 state.pre 保存到 originalPreState 上
   const originalPreState = state.pre
   if (el.pre) {
+    // 如果 el.pre 为 true，将 state.pre 保存为 true
     state.pre = el.pre
   }
+  // genElement 会生成如下字符串：_c('ul',{attrs:{"id":"demo"}},[_c('div')])
+  // 将 with(this){return ${genElement(el, state)}} push 到 state.staticRenderFns
   state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`)
+  // 将 state.pre 还原
   state.pre = originalPreState
+  // _m 为 renderStatic 函数，如果
+  // 返回一个 _m 函数拼接成的字符串，el.staticInFor 为true，则 _m 第二个参数会传入 true
   return `_m(${
     state.staticRenderFns.length - 1
   }${
@@ -135,12 +147,16 @@ function genStatic (el: ASTElement, state: CodegenState): string {
   })`
 }
 
-// v-once
+// 处理 v-once
 function genOnce (el: ASTElement, state: CodegenState): string {
+  // 将 onceProcessed 设置为 true
   el.onceProcessed = true
   if (el.if && !el.ifProcessed) {
+    // 如果存在 v-if, 且没有经过 genIf 处理
+    // 调用 genIf 处理，并且将其值返回
     return genIf(el, state)
   } else if (el.staticInFor) {
+    // 如果存在 el.staticInFor，那么处理 for
     let key = ''
     let parent = el.parent
     while (parent) {
@@ -158,17 +174,21 @@ function genOnce (el: ASTElement, state: CodegenState): string {
     }
     return `_o(${genElement(el, state)},${state.onceId++},${key})`
   } else {
+    // 如果即不存在 v-if，又不存在 for，调用 el.staticInFor 并且将其值返回
     return genStatic(el, state)
   }
 }
 
+// 处理 v-if 指令
 export function genIf (
   el: any,
   state: CodegenState,
   altGen?: Function,
   altEmpty?: string
 ): string {
-  el.ifProcessed = true // avoid recursion
+  // 将 el.ifProcessed 设置为 true，避免死循环
+  el.ifProcessed = true
+  // 调用 genIfConditions 处理 v-if 指令
   return genIfConditions(el.ifConditions.slice(), state, altGen, altEmpty)
 }
 
@@ -178,12 +198,16 @@ function genIfConditions (
   altGen?: Function,
   altEmpty?: string
 ): string {
+  // 如果 conditions 为空 
   if (!conditions.length) {
+    // 如果传入了 altEmpty，返回 altEmpty 否则返回 ‘_e()’，_e() 为 createEmptyVNode
     return altEmpty || '_e()'
   }
-
+  // 将 conditions的第一个元素赋值给 condition 
   const condition = conditions.shift()
+  // 如果存在 condition.exp
   if (condition.exp) {
+    // 调用 genTernaryExp 函数，
     return `(${condition.exp})?${
       genTernaryExp(condition.block)
     }:${
@@ -193,8 +217,11 @@ function genIfConditions (
     return `${genTernaryExp(condition.block)}`
   }
 
-  // v-if with v-once should generate code like (a)?_m(0):_m(1)
+  // 如果 v-if 和 v-once 同时存在，应该生成 (a)?_m(0):_m(1) 这样的代码
   function genTernaryExp (el) {
+    // 如果传入 altGen，调用 altGen(el, state) 并且将其值返回
+    // 如果存在 el.once，调用 genOnce(el, state) 并且将其值返回
+    // 否则调用 genElement(el, state) 将其值返回
     return altGen
       ? altGen(el, state)
       : el.once
