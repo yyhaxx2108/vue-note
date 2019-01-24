@@ -207,13 +207,15 @@ function genIfConditions (
   const condition = conditions.shift()
   // 如果存在 condition.exp
   if (condition.exp) {
-    // 调用 genTernaryExp 函数，
+    // 调用 genTernaryExp 函数，返回 _m、_s 函数字符串。
+    // 用 exp 拼接三元运算 genTernaryExp 字符串，并且返回。
     return `(${condition.exp})?${
       genTernaryExp(condition.block)
     }:${
       genIfConditions(conditions, state, altGen, altEmpty)
     }`
   } else {
+    // 如果不存在，那么 genTernaryExp 调用返回值，并且返回字符串
     return `${genTernaryExp(condition.block)}`
   }
 
@@ -230,32 +232,39 @@ function genIfConditions (
   }
 }
 
+
 export function genFor (
   el: any,
   state: CodegenState,
   altGen?: Function,
   altHelper?: string
 ): string {
+  // 将需要遍历数组表达式赋值给 exp
   const exp = el.for
+  // 将需要迭代的表达式赋值给 alias
   const alias = el.alias
+  // 将 key 赋值给 iterator1
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
+  // 将 index 赋值给 iterator2
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
-
+  // 如果可能是组件，并且不是 slot，并且不是 template，并且不存在key
   if (process.env.NODE_ENV !== 'production' &&
     state.maybeComponent(el) &&
     el.tag !== 'slot' &&
     el.tag !== 'template' &&
     !el.key
   ) {
+    // 报警告，在不是slot和component的 v-for 组件中，需要指定key
     state.warn(
       `<${el.tag} v-for="${alias} in ${exp}">: component lists rendered with ` +
       `v-for should have explicit keys. ` +
       `See https://vuejs.org/guide/list.html#key for more info.`,
-      true /* tip */
+      true 
     )
   }
-
-  el.forProcessed = true // avoid recursion
+  // 将 el.forProcessed 设置为 true，避免死循环
+  el.forProcessed = true
+  // 如果传入的 altHelper 或者 _l 函数生产字符串
   return `${altHelper || '_l'}((${exp}),` +
     `function(${alias}${iterator1}${iterator2}){` +
       `return ${(altGen || genElement)(el, state)}` +
@@ -583,7 +592,6 @@ function genProps (props: Array<{ name: string, value: any }>): string {
   return res.slice(0, -1)
 }
 
-/* istanbul ignore next */
 function generateValue (value) {
   if (typeof value === 'string') {
     return transformSpecialNewlines(value)
