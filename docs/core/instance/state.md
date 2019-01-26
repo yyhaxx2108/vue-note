@@ -30,13 +30,9 @@ import {
   isReservedAttribute
 } from '../util/index'
 
-const sharedPropertyDefinition = {
-  enumerable: true,
-  configurable: true,
-  get: noop,
-  set: noop
-}
 
+// 定义一个对象，该对象 enumerable、configurable 为true，get、set 为 noop
+// 该对象作为 Obj.defineProperty 的第三个参数，其中 get、set 都会被重写
 const sharedPropertyDefinition = {
   enumerable: true,
   configurable: true,
@@ -46,12 +42,19 @@ const sharedPropertyDefinition = {
 
 // 代理 proxy(vm, `_data`, key) 
 export function proxy (target: Object, sourceKey: string, key: string) {
+  // 重写 get 函数
   sharedPropertyDefinition.get = function proxyGetter () {
+    // 这里的 this 本来是 sharedPropertyDefinition，
+    // 但是如果在 Object.defineProperty 将指代为 target
+    // 返回 target[sourceKey][key] 的值
     return this[sourceKey][key]
   }
+  // 定义 set 函数
   sharedPropertyDefinition.set = function proxySetter (val) {
+    // 将 target[sourceKey][key] 的值设置为 val
     this[sourceKey][key] = val
   }
+  // 对 target 对象上的 key 进行代理，其描述对象为 sharedPropertyDefinition
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
@@ -145,14 +148,16 @@ function initProps (vm: Component, propsOptions: Object) {
 function initData (vm: Component) {
   // 定义 data，且 data 为 vm.$options.data 的引用
   let data = vm.$options.data
-  // 这里对 data 进行了取值
+  // 这里对 data 进行了取值, 除了给 data 赋值以外，还给 vm._data 赋予了相同的值
   // mergeOptions 将 data 变成了函数，但是 beforeCreated 中，可能将其修改
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
   // 如果 data 不是纯对象，那么报警告
   if (!isPlainObject(data)) {
+    // 将 data 设置为空对象
     data = {}
+    // 报警告
     process.env.NODE_ENV !== 'production' && warn(
       'data functions should return an object:\n' +
       'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
@@ -168,6 +173,7 @@ function initData (vm: Component) {
   let i = keys.length
   // 对 keys 进行遍历
   while (i--) {
+    // 将 keys[i] 缓存到 key 上面
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
       // 如果 methods 中有 key 抛出警告

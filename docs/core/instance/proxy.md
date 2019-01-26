@@ -93,7 +93,9 @@ if (process.env.NODE_ENV !== 'production') {
     }
   }
 
+  // 将 vm 进行代理，对对象访问进行劫持
   initProxy = function initProxy (vm) {
+    // 判断浏览器是否支持代理
     if (hasProxy) {
       // vm.$options 的引用
       const options = vm.$options

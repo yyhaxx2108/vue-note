@@ -150,7 +150,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
-// 挂载组件的函数，vm 是 组件 的实例，el 为挂载节点，hydrating为透传的参数
+// 挂载组件的函数，vm 是组件的实例，el 为挂载节点，hydrating 为透传的参数，与服务端相关
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -173,7 +173,7 @@ export function mountComponent (
           vm
         )
       } else {
-        // 否则直接报 边缘错误
+        // 否则直接报，编译错误
         warn(
           'Failed to mount component: template or render function not defined.',
           vm
@@ -186,6 +186,7 @@ export function mountComponent (
 
   // 下面代码是对 updateComponent 进行初始化
   let updateComponent
+  // 性能优化相关
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     // 在非生产环境，对性能进行测试
     updateComponent = () => {
@@ -209,6 +210,7 @@ export function mountComponent (
   } else {
     // updateComponent 是一个函数，把渲染函数生成的虚拟DOM渲染成真正的DOM
     updateComponent = () => {
+      // vm._render() 生成 VNode
       vm._update(vm._render(), hydrating)
     }
   }
@@ -222,7 +224,7 @@ export function mountComponent (
         callHook(vm, 'beforeUpdate')
       }
     }
-  }, true /* isRenderWatcher */)
+  }, true /* 渲染 wathers */)
   hydrating = false
 
   // manually mounted instance, call mounted on self

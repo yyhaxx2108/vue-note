@@ -34,7 +34,7 @@ export function initRender (vm: Component) {
   // a, b, c, d 分别代表 tag，data，children，normalizationType
   // 内部调用，编译器根据模板字符串生成的渲染函数的
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
-  // 用户写 render 函数时调用
+  // 用户手写 render 函数时调用
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
   // $attrs、$listeners主要用于创建高级别的组件
@@ -66,9 +66,11 @@ export function renderMixin (Vue: Class<Component>) {
     return nextTick(fn, this)
   }
 
-  // 在 Vue.prototype 上定义了 _render 方法
+  // 在 Vue.prototype 上定义了 _render 方法，返回 VNode
   Vue.prototype._render = function (): VNode {
+    // 将 Vue 实例保存到 vm 上
     const vm: Component = this
+    // 将 vm.$options.render 和 vm.$options._parentVnode 分别保存到 render 和 _parentVnode 上
     const { render, _parentVnode } = vm.$options
 
     if (_parentVnode) {
@@ -81,12 +83,14 @@ export function renderMixin (Vue: Class<Component>) {
     // render self
     let vnode
     try {
+      // 调用 render 方法生成 vnode
+      // vm._renderProxy 在生产环境下就是 vm，在开发环境是 proxy 对象
+      // vm.$createElement 在 initRender 中定义
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
+      // 如果 render 方法抛出错误，将错误交给 handleError 处理
       handleError(e, vm, `render`)
-      // return error render result,
-      // or previous vnode to prevent render error causing blank component
-      /* istanbul ignore else */
+      // 返回错误呈现结果或以前的Vnode，以防止呈现错误导致空白组件
       if (process.env.NODE_ENV !== 'production' && vm.$options.renderError) {
         try {
           vnode = vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e)
@@ -98,15 +102,18 @@ export function renderMixin (Vue: Class<Component>) {
         vnode = vm._vnode
       }
     }
-    // return empty vnode in case the render function errored out
+    // 如果 render 函数出错，则返回空Vnode
     if (!(vnode instanceof VNode)) {
+      // 如果 vnode 是数组
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
+        // 报警告，只能有一个根组件
         warn(
           'Multiple root nodes returned from render function. Render function ' +
           'should return a single root node.',
           vm
         )
       }
+      // 创建一个空白组件
       vnode = createEmptyVNode()
     }
     // set parent

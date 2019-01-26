@@ -54,6 +54,7 @@ export function initMixin (Vue: Class<Component>) {
       // 主要是为了提供更好的提示信息
       initProxy(vm)
     } else {
+      // 在生产环境中 vm._renderProxy 就是 vm
       vm._renderProxy = vm
     }
     // 通过 vm._self 暴露事例自身
@@ -83,7 +84,7 @@ export function initMixin (Vue: Class<Component>) {
       // measure是measure、clearMarks、clearMeasures的方法进行封装
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
-    // 如果存在vm.$options.el，则调用vm.$mount方法
+    // 如果存在vm.$options.el，则调用vm.$mount方法,进行挂载
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
