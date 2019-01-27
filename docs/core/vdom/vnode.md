@@ -73,15 +73,21 @@ export default class VNode {
   }
 }
 
-// 创建一个空节点
+// 创建一个空节点，实际上是一个注释节点
 export const createEmptyVNode = (text: string = '') => {
+  // 实例化一个 VNode 对象，保存到 node 上
   const node = new VNode()
+  // 如果传入了 text 将 node.text 赋值为 text
   node.text = text
+  // 将 node.isComment 设置为 true
   node.isComment = true
+  // 返回 node
   return node
 }
 
+// 创建一个文本节点
 export function createTextVNode (val: string | number) {
+  // 返回一个 VNode 实例
   return new VNode(undefined, undefined, undefined, String(val))
 }
 

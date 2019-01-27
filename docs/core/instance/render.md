@@ -32,9 +32,9 @@ export function initRender (vm: Component) {
   // 是对内部函数 createElement 的包装
   // 为了获取正确的上下文环境，我们将 createElement 方法绑定到这个实例上
   // a, b, c, d 分别代表 tag，data，children，normalizationType
-  // 内部调用，编译器根据模板字符串生成的渲染函数的
+  // 内部调用，编译器根据模板字符串生成的渲染函数的了，最后一个参数为 false
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
-  // 用户手写 render 函数时调用
+  // 用户手写 render 函数时调用，最后一个参数为 true
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
   // $attrs、$listeners主要用于创建高级别的组件
