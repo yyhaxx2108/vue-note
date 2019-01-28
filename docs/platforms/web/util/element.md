@@ -4,8 +4,11 @@
 import { inBrowser } from 'core/util/env'
 import { makeMap } from 'shared/util'
 
+// 定义标签作用域字典
 export const namespaceMap = {
+  // 用于 svg
   svg: 'http://www.w3.org/2000/svg',
+  // 用于 MathML
   math: 'http://www.w3.org/1998/Math/MathML'
 }
 

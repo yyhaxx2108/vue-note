@@ -64,19 +64,28 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
-  // 在 Vue.prototype 上定义了 _update 方法
+  // 在 Vue.prototype 上定义了 _update 方法，改方法的作用是把 VNode 渲染成真实 Dom
+  // 调用时机有俩个，1、第一次渲染的时候会调用，2、数据改变的时候会调用 
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
+    // 保存当前实例
     const vm: Component = this
+    // 用 prevEl 保存 vm.$el 的引用
     const prevEl = vm.$el
+    // 用 prevVnode 保存 vm._vnode 的引用
     const prevVnode = vm._vnode
+    // 将 activeInstance 赋值到 prevActiveInstance 上
     const prevActiveInstance = activeInstance
+    // 将当前实例赋值到 activeInstance 上
     activeInstance = vm
+    // 将 vnode 赋值给 vm._vnode
     vm._vnode = vnode
-    // Vue.prototype.__patch__ is injected in entry points
-    // based on the rendering backend used.
+    // Vue.prototype.__patch__ 会在入口点被注入，用于不同环境进行补丁算法
+    // 判断 prevVnode 是否存在
     if (!prevVnode) {
-      // initial render
-      vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
+      // 如果不存在，说明是初始化渲染，调用 vm.__patch__ 函数，将其值赋值给 vm.$el
+      // 传入的 vm.$el 为 旧的 vnode，即为用于挂载的 dom（真实dom）
+      // vnode 传入的 vnode(虚拟dom)，hydrating 是否为服务端渲染，最后一个参数为 removeOnly
+      vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false)
     } else {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)

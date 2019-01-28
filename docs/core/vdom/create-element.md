@@ -123,10 +123,12 @@ export function _createElement (
   if (typeof tag === 'string') {
     // 定义一个 Ctor
     let Ctor
+    // 如果存在 context.$vnode.ns，将 context.$vnode.ns 赋值给 ns。否则用 config.getTagNamespace 获取 ns
+    // 这里会给 svg 或 math 标签填上作用域
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
     // 判断 tag 是否保留标签
     if (config.isReservedTag(tag)) {
-      // 创建一个平台保留标签
+      // 创建一个平台保留标签，config.parsePlatformTagName 即 identity 函数，改函数的作用是返回传入参数
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context

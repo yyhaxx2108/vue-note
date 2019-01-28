@@ -228,9 +228,7 @@ export function noop (a?: any, b?: any, c?: any) {}
 // 永远返回 false 的函数
 export const no = (a?: any, b?: any, c?: any) => false
 
-/**
- * Return the same value.
- */
+// 返回相同值
 export const identity = (_: any) => _
 
 // 从编译器模块生成包含静态键的字符串。
