@@ -26,14 +26,19 @@ export function createElementNS (namespace: string, tagName: string): Element {
   return document.createElementNS(namespaceMap[namespace], tagName)
 }
 
+// 创建一个文本节点
 export function createTextNode (text: string): Text {
+  // 返回创建好的文本节点
   return document.createTextNode(text)
 }
 
+// 创建一个注释节点
 export function createComment (text: string): Comment {
+  // 返回创建好的注释节点
   return document.createComment(text)
 }
 
+// 
 export function insertBefore (parentNode: Node, newNode: Node, referenceNode: Node) {
   parentNode.insertBefore(newNode, referenceNode)
 }
