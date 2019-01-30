@@ -38,8 +38,9 @@ export function createComment (text: string): Comment {
   return document.createComment(text)
 }
 
-// 
+// 将 newNode 插到 referenceNode 节点之前
 export function insertBefore (parentNode: Node, newNode: Node, referenceNode: Node) {
+  // 插入节点
   parentNode.insertBefore(newNode, referenceNode)
 }
 

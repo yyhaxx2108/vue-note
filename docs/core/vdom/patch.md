@@ -194,7 +194,8 @@ export function createPatchFunction (backend) {
       // 如果存在 vnode.ns，调用 createElementNS 否则用 createElement来创建真实 dom，并且保存到 vnode.elm 
       vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
-        : nodeOps.createElement(tag, vnode)
+        : nodeOps.createElement(tag, vnode) 
+      // 给 css 样式设置作用域
       setScope(vnode)
 
       if (__WEEX__) {
@@ -216,10 +217,15 @@ export function createPatchFunction (backend) {
           insert(parentElm, vnode.elm, refElm)
         }
       } else {
+        // 创建子节点，这里
         createChildren(vnode, children, insertedVnodeQueue)
+        // 判读是否定义了 data 
         if (isDef(data)) {
+          // 如果定义了 data，调用 invokeCreateHooks 钩子函数
+          //
           invokeCreateHooks(vnode, insertedVnodeQueue)
         }
+        // 调用 insert 方法，插入 vnode.elm
         insert(parentElm, vnode.elm, refElm)
       }
 
@@ -227,10 +233,14 @@ export function createPatchFunction (backend) {
         creatingElmInVPre--
       }
     } else if (isTrue(vnode.isComment)) {
+      // 如果 vnode 是注释节点，创建一个注释节点，并且保存到 vnode.elm 上
       vnode.elm = nodeOps.createComment(vnode.text)
+      // 调用 insert 方法，插入 vnode.elm
       insert(parentElm, vnode.elm, refElm)
     } else {
+      // 如果不是上面的清空，那么说明 vnode 是 文本节点，直接创建文本节点
       vnode.elm = nodeOps.createTextNode(vnode.text)
+      // 调用 insert 方法，插入 vnode.elm
       insert(parentElm, vnode.elm, refElm)
     }
   }
@@ -297,27 +307,43 @@ export function createPatchFunction (backend) {
     insert(parentElm, vnode.elm, refElm)
   }
 
+  // 插入节点，parent 为父节点，elm 为当前会插入的节点，ref 为参考节点
   function insert (parent, elm, ref) {
+    // 如果定义了 parent
     if (isDef(parent)) {
+      // 判断是否定义了 ref
       if (isDef(ref)) {
+        // 如果定义了ref，并且 ref 的 parentNode 就是 parent
         if (nodeOps.parentNode(ref) === parent) {
+          // 将 elm 插入 ref 之前
           nodeOps.insertBefore(parent, elm, ref)
         }
       } else {
+        // 如果没有定义 ref，直接在 parent 中插入 elm
         nodeOps.appendChild(parent, elm)
       }
     }
   }
 
+  // 创建子节点
   function createChildren (vnode, children, insertedVnodeQueue) {
+    // 判读 children 是否为数组类型
     if (Array.isArray(children)) {
+      // 如果 children 是数组
       if (process.env.NODE_ENV !== 'production') {
+        // 检验 children 的 key 是否唯一
         checkDuplicateKeys(children)
       }
+      // 遍历 children
       for (let i = 0; i < children.length; ++i) {
+        // 调用 createElm 创建子节点
+        // children[i] 为 vnode、insertedVnodeQueue 需要插入的 node、vnode.elm 真实dom、
+        // null 为 参考节点、true 为 nested、ownerArray 为 children、index 为 i
         createElm(children[i], insertedVnodeQueue, vnode.elm, null, true, children, i)
       }
     } else if (isPrimitive(vnode.text)) {
+      // 如果 children不为数组，且vnode.text为基础类型，调用 nodeOps.appendChild
+      // 调用 nodeOps.createTextNode(String(vnode.text) 创建文本节点，然后在 append 到 vnode.elm
       nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(String(vnode.text)))
     }
   }
@@ -343,6 +369,7 @@ export function createPatchFunction (backend) {
   // set scope id attribute for scoped CSS.
   // this is implemented as a special case to avoid the overhead
   // of going through the normal attribute patching process.
+  // 为作用域环境下的css 设置一个 id 作用域标签，这是为了避免常规属性修补过程的开销而进行的特殊实现
   function setScope (vnode) {
     let i
     if (isDef(i = vnode.fnScopeId)) {
@@ -502,18 +529,27 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 校验 children 的 key 是否唯一
   function checkDuplicateKeys (children) {
+    // 定义一个 空对象
     const seenKeys = {}
+    // 遍历 children
     for (let i = 0; i < children.length; i++) {
+      // 将 child 的引用保存到 vnode 上
       const vnode = children[i]
+      // 缓存 vnode.key 到 key 上
       const key = vnode.key
+      // 如果定义了 key 
       if (isDef(key)) {
+        // 判断 seenKeys.key 是否为 true
         if (seenKeys[key]) {
+          // 如果 seenKeys[key]为 true，说明 key 重复，报警告 
           warn(
             `Duplicate keys detected: '${key}'. This may cause an update error.`,
             vnode.context
           )
         } else {
+          // 如果 seenKeys[key]不为 true，将 seenKeys[key] 设置为true
           seenKeys[key] = true
         }
       }
@@ -746,7 +782,7 @@ export function createPatchFunction (backend) {
       // 空装载（可能是组件），创建新的根元素
       // 将 isInitialPatch 设置成 true
       isInitialPatch = true
-      // 
+      // 以 vnode 创建真实 dom
       createElm(vnode, insertedVnodeQueue)
     } else {
       // 将 isDef(oldVnode.nodeType) 的值赋值给 isRealElement
