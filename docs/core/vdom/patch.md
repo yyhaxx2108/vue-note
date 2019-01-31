@@ -238,7 +238,7 @@ export function createPatchFunction (backend) {
       // 调用 insert 方法，插入 vnode.elm
       insert(parentElm, vnode.elm, refElm)
     } else {
-      // 如果不是上面的清空，那么说明 vnode 是 文本节点，直接创建文本节点
+      // 如果不是上面的清空，那么说明 vnode 是文本节点，直接创建文本节点
       vnode.elm = nodeOps.createTextNode(vnode.text)
       // 调用 insert 方法，插入 vnode.elm
       insert(parentElm, vnode.elm, refElm)
