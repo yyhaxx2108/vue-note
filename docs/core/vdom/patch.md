@@ -414,6 +414,7 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 删除需要被替换的节点
   function removeVnodes (parentElm, vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {
       const ch = vnodes[startIdx]
@@ -873,10 +874,13 @@ export function createPatchFunction (backend) {
           }
         }
 
-        // destroy old node
+        // 删除旧的节点
+        // 如果定义了 parentElm 节点
         if (isDef(parentElm)) {
+          // 调用 removeVnodes 删除旧的节点
           removeVnodes(parentElm, [oldVnode], 0, 0)
         } else if (isDef(oldVnode.tag)) {
+          // 调用一些钩子函数
           invokeDestroyHook(oldVnode)
         }
       }
