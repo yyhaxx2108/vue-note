@@ -18,24 +18,37 @@ export function initExtend (Vue: GlobalAPI) {
    * Class inheritance
    */
   Vue.extend = function (extendOptions: Object): Function {
+    // 如果没有传入 extendOptions，则将 extendOptions 设置为空对象
     extendOptions = extendOptions || {}
+    // 将 Vue 赋值给 Super
     const Super = this
+    // 定义 SuperId 为 Super.cid
     const SuperId = Super.cid
+    // 将 extendOptions._Ctor 或者 {} 保存到 cachedCtors 上
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
+    // 如果 cachedCtors[SuperId]，说明已经缓存过了 construtor
     if (cachedCtors[SuperId]) {
+      // 直接返回缓存过的 construtor
       return cachedCtors[SuperId]
     }
 
+    // 缓存 name，name可以来自于 extendOptions.name 或 Super.options.name
     const name = extendOptions.name || Super.options.name
+    // 在非生产环境中
     if (process.env.NODE_ENV !== 'production' && name) {
+      // 对 name 进行校验
       validateComponentName(name)
     }
 
+    // 定义一个 Sub 方法，该方法会调用 this._init(options)
     const Sub = function VueComponent (options) {
       this._init(options)
     }
+    // 让 Sub 的 prototype 继承自 Super.prototype
     Sub.prototype = Object.create(Super.prototype)
+    // Sub.prototype.constructor 指向自身，完成继承
     Sub.prototype.constructor = Sub
+    // 将 cid++ 赋值给 Sub.cid
     Sub.cid = cid++
     Sub.options = mergeOptions(
       Super.options,

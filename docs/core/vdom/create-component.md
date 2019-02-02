@@ -101,6 +101,7 @@ const componentVNodeHooks = {
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
+// 创建组件 Vnode
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data: ?VNodeData,
@@ -108,14 +109,17 @@ export function createComponent (
   children: ?Array<VNode>,
   tag?: string
 ): VNode | Array<VNode> | void {
+  // 如果没有传入 Ctor 直接 return
   if (isUndef(Ctor)) {
     return
   }
 
+  // 将 Vue 或者其扩展保存到 baseCtor 上
   const baseCtor = context.$options._base
 
-  // plain options object: turn it into a constructor
+  // 如果 Ctor 是纯对象，将其转化成 constructor
   if (isObject(Ctor)) {
+    // 调用 Vue.extend 方法实现
     Ctor = baseCtor.extend(Ctor)
   }
 
