@@ -48,7 +48,7 @@ export function initExtend (Vue: GlobalAPI) {
     Sub.prototype = Object.create(Super.prototype)
     // Sub.prototype.constructor 指向自身，完成继承
     Sub.prototype.constructor = Sub
-    // 将 cid++ 赋值给 Sub.cid， 😭
+    // 将 cid++ 赋值给 Sub.cid
     Sub.cid = cid++
     Sub.options = mergeOptions(
       Super.options,
