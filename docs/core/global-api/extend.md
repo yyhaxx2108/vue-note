@@ -22,7 +22,7 @@ export function initExtend (Vue: GlobalAPI) {
     extendOptions = extendOptions || {}
     // 将 Vue 赋值给 Super
     const Super = this
-    // 定义 SuperId 为 Super.cid
+    // 定义 SuperId 为 Super.cid，即Vue.cid
     const SuperId = Super.cid
     // 将 extendOptions._Ctor 或者 {} 保存到 cachedCtors 上
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
@@ -47,13 +47,15 @@ export function initExtend (Vue: GlobalAPI) {
     // 让 Sub 的 prototype 继承自 Super.prototype
     Sub.prototype = Object.create(Super.prototype)
     // Sub.prototype.constructor 指向自身，完成继承
-    Sub.prototype.constructor = Sub
+    Sub.prototype.constructor  = Sub
     // 将 cid++ 赋值给 Sub.cid
     Sub.cid = cid++
+    // 对 options 进行合并
     Sub.options = mergeOptions(
       Super.options,
       extendOptions
     )
+    // 将 super 指向 Vue
     Sub['super'] = Super
 
     // For props and computed properties, we define the proxy getters on
