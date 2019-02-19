@@ -36,6 +36,7 @@ import {
 
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
+  // 创建一个 Vue 的实例，并且调用 $mount 进行挂载
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
     if (
       vnode.componentInstance &&
@@ -46,11 +47,13 @@ const componentVNodeHooks = {
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // 创建一个实例
       // activeInstance 为当前正在渲染的实例的引用
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
       )
+      // 挂载这个实例
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
@@ -215,8 +218,8 @@ export function createComponent (
 // 实例化子组件
 // parent 为当前正在渲染的实例的引用
 export function createComponentInstanceForVnode (
-  vnode: any, // we know it's MountedComponentVNode but flow doesn't
-  parent: any, // activeInstance in lifecycle state
+  vnode: any,
+  parent: any,
 ): Component {
   const options: InternalComponentOptions = {
     _isComponent: true,
@@ -229,6 +232,7 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  // 实例化自组件的构造函数
   return new vnode.componentOptions.Ctor(options)
 }
 

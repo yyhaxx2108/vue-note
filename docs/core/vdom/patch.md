@@ -246,10 +246,15 @@ export function createPatchFunction (backend) {
   }
 
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
+    // 保存 vnode.data 到节点 i 上
     let i = vnode.data
+    // 判断是否定义 vnode.data 如果未定义该函数返回 undefined，说明不是函数组件
+    // 如果 vnode 是函数组件，那么在创建组件 VNode 的时候合并钩子函数中就包含 init 钩子函数
     if (isDef(i)) {
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
+      // 如果定义了 i.hook 并且在i.hook 中 存在了 i.init
       if (isDef(i = i.hook) && isDef(i = i.init)) {
+        // 调用 init，vnode 为虚拟dom
         i(vnode, false /* hydrating */)
       }
       // after calling the init hook, if the vnode is a child component
