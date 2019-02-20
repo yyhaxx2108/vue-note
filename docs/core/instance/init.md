@@ -91,22 +91,34 @@ export function initMixin (Vue: Class<Component>) {
   }
 }
 
+// 初始化内部组件
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   // 以 vm.constructor.options 为原型对象创造一个空对象，并且赋值给vm.$options
   const opts = vm.$options = Object.create(vm.constructor.options)
   // 用一个个赋值代替列举赋值来提升性能，这里缓存parentVnode，方便后面使用
+  // 将占位节点保存到 parentVnode 上
   const parentVnode = options._parentVnode
+  // 将父亲节点保存到 opts.parent 上
   opts.parent = options.parent
+  // 将占位节点保存到 opts._parentVnode 上
   opts._parentVnode = parentVnode
 
+  // 读取占位节点的 componentOptions，并且保存到 vnodeComponentOptions 上
   const vnodeComponentOptions = parentVnode.componentOptions
+  // 将占位节点上的 propsData 保存到 opts.propsData 上
   opts.propsData = vnodeComponentOptions.propsData
+  // 将占位节点上的 listeners 保存到 opts._parentListeners 上
   opts._parentListeners = vnodeComponentOptions.listeners
+  // 将占位节点上的 children 保存到 opts._renderChildren 上
   opts._renderChildren = vnodeComponentOptions.children
+  // 将占位节点上的 tag 保存到 opts._componentTag 上
   opts._componentTag = vnodeComponentOptions.tag
 
+  // 如果存在 options.render
   if (options.render) {
+    // 将 options.render 赋值给 opts.render
     opts.render = options.render
+    // 将 options.staticRenderFns 赋值给 opts.staticRenderFns
     opts.staticRenderFns = options.staticRenderFns
   }
 }

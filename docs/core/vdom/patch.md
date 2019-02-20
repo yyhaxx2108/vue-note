@@ -254,19 +254,20 @@ export function createPatchFunction (backend) {
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
       // 如果定义了 i.hook 并且在i.hook 中 存在了 i.init
       if (isDef(i = i.hook) && isDef(i = i.init)) {
-        // 调用 init，vnode 为虚拟dom
-        i(vnode, false /* hydrating */)
+        // 调用 init，vnode 为虚拟dom，init 会生成真实 dom 实例
+        i(vnode, false )
       }
-      // after calling the init hook, if the vnode is a child component
-      // it should've created a child instance and mounted it. the child
-      // component also has set the placeholder vnode's elm.
-      // in that case we can just return the element and be done.
+      // 在调用 init 钩子函数后，如果 vnode 是子组件，那么他需要被实例化，并且进行挂载。
+      // 子组件也会将原来的组件替换掉，正式如此，我们只需要将节点返回就完成了
       if (isDef(vnode.componentInstance)) {
+        // 如果存在 vnode.componentInstance，首先调用 initComponent 方法
         initComponent(vnode, insertedVnodeQueue)
+        // 将 vnode.elm 插入 refElm 前
         insert(parentElm, vnode.elm, refElm)
         if (isTrue(isReactivated)) {
           reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm)
         }
+        // 返回 true
         return true
       }
     }
@@ -892,6 +893,7 @@ export function createPatchFunction (backend) {
     }
 
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
+    // 将新生成的节点返回
     return vnode.elm
   }
 }

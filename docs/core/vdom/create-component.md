@@ -221,6 +221,7 @@ export function createComponentInstanceForVnode (
   vnode: any,
   parent: any,
 ): Component {
+  // 定义 options，vnode 为占位节点，parent 为父节点
   const options: InternalComponentOptions = {
     _isComponent: true,
     _parentVnode: vnode,
