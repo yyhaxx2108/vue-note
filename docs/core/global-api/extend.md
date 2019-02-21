@@ -20,7 +20,7 @@ export function initExtend (Vue: GlobalAPI) {
   Vue.extend = function (extendOptions: Object): Function {
     // 如果没有传入 extendOptions，则将 extendOptions 设置为空对象
     extendOptions = extendOptions || {}
-    // 将 Vue 赋值给 Super
+    // 将 Vue 赋值给 Super, this 指的是 Vue
     const Super = this
     // 定义 SuperId 为 Super.cid，即Vue.cid
     const SuperId = Super.cid
@@ -42,6 +42,7 @@ export function initExtend (Vue: GlobalAPI) {
 
     // 定义一个 Sub 方法，该方法会调用 this._init(options)
     const Sub = function VueComponent (options) {
+      // 调用 init 方法， init 就是 vue.prototype.init
       this._init(options)
     }
     // 让 Sub 的 prototype 继承自 Super.prototype
@@ -68,7 +69,7 @@ export function initExtend (Vue: GlobalAPI) {
       initComputed(Sub)
     }
 
-    // allow further extension/mixin/plugin usage
+    // 运行子组件调用扩展方法
     Sub.extend = Super.extend
     Sub.mixin = Super.mixin
     Sub.use = Super.use
@@ -90,8 +91,9 @@ export function initExtend (Vue: GlobalAPI) {
     Sub.extendOptions = extendOptions
     Sub.sealedOptions = extend({}, Sub.options)
 
-    // cache constructor
+    // 换成 Sub
     cachedCtors[SuperId] = Sub
+    // 将 Sub 返回
     return Sub
   }
 }

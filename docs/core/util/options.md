@@ -269,6 +269,7 @@ function checkComponents (options: Object) {
 // 1.组件的名字要满足正则表达式：/^[a-zA-Z][\w-]*$/
 // 要满足：条件 isBuiltInTag(name) || config.isReservedTag(name) 不成立
 export function validateComponentName (name: string) {
+  // 如果名字包含了 [a-zA-Z][\w-] 以外的字符，或者不是字母开头，报警告
   if (!/^[a-zA-Z][\w-]*$/.test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +

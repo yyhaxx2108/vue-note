@@ -102,6 +102,7 @@ const componentVNodeHooks = {
   }
 }
 
+// 该数组的值是 [init, prepatch, insert,destroy]
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
 // 创建组件 Vnode
@@ -122,20 +123,22 @@ export function createComponent (
 
   // 如果 Ctor 是纯对象，将其转化成 constructor
   if (isObject(Ctor)) {
-    // 调用 Vue.extend 方法实现
+    // 调用 Vue.extend 方法实现，该方法会返回 Sub，继承Vue 的 构造函数
     Ctor = baseCtor.extend(Ctor)
   }
 
   // if at this stage it's not a constructor or an async component factory,
   // reject.
+  // 如果 Ctor 不是一个函数，那说明 vue.extends 返回值出现错误
   if (typeof Ctor !== 'function') {
     if (process.env.NODE_ENV !== 'production') {
+      // 报警告，组件定义不正确
       warn(`Invalid Component definition: ${String(Ctor)}`, context)
     }
     return
   }
 
-  // async component
+  // 异步组件
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
@@ -192,7 +195,7 @@ export function createComponent (
     }
   }
 
-  // install component management hooks onto the placeholder node
+  // 安装一些组件钩子函数
   installComponentHooks(data)
 
   // return a placeholder vnode
@@ -237,25 +240,39 @@ export function createComponentInstanceForVnode (
   return new vnode.componentOptions.Ctor(options)
 }
 
+// 安装组件的钩子
 function installComponentHooks (data: VNodeData) {
+  // 缓存 data.hook 
   const hooks = data.hook || (data.hook = {})
+  // 遍历 hooksToMerge，hooksToMerge的值是 [init, prepatch, insert,destroy]
   for (let i = 0; i < hooksToMerge.length; i++) {
+    // 将当前元素保存到 key 上面
     const key = hooksToMerge[i]
+    // 读取 data 中传入到 hooks
     const existing = hooks[key]
+    // 读取 componentVNodeHooks 的hooks
     const toMerge = componentVNodeHooks[key]
+    // 如果传入的 hooks 和 componentVNodeHooks 上的 hooks 相等，
+    // 或没有传入 hooks 并且传入的 hooks 中有 _merged，不进行操作
     if (existing !== toMerge && !(existing && existing._merged)) {
+      // 如果传入了 existing 调用 mergeHook 进行合并，并且将其返回值赋值给 hooks[key]
+      // 如果没有传入 existing，直接将 toMerge 赋值给 hooks[key]
       hooks[key] = existing ? mergeHook(toMerge, existing) : toMerge
     }
   }
 }
 
+// 合并组件钩子
 function mergeHook (f1: any, f2: any): Function {
+  // 定义mereged 函数，该函数会依次调用 f1、f2
   const merged = (a, b) => {
     // flow complains about extra args which is why we use any
     f1(a, b)
     f2(a, b)
   }
+  // 将 merged 的 _merged 值设置为 true
   merged._merged = true
+  // 将 merged 返回
   return merged
 }
 

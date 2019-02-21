@@ -90,6 +90,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
+    // 将 activeInstance 还原成 prevActiveInstance
     activeInstance = prevActiveInstance
     // update __vue__ reference
     if (prevEl) {
