@@ -70,7 +70,9 @@ export function pushTarget (target: ?Watcher) {
 
 // 将当前 Wathcer 的前一个值赋值给 Dep.target，同时将当前 Wather 从 targetStack 移除掉
 export function popTarget () {
+  // 将栈顶的 Wather 推出去
   targetStack.pop()
+  // 将倒数第二个 Wather 赋值给 Dep.target
   Dep.target = targetStack[targetStack.length - 1]
 }
 

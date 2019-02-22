@@ -238,10 +238,12 @@ export function mountComponent (
   }, true /* 渲染 wathers */)
   hydrating = false
 
-  // manually mounted instance, call mounted on self
-  // mounted is called for render-created child components in its inserted hook
+  // 对于子组件的实例，会在 insert 钩子中调用其 mounted 方法
+  // 如果 vm.$vnode 不存在，说明 vm 没有对应的占位节点
   if (vm.$vnode == null) {
+    // 将 vm._isMounted 设置为 true
     vm._isMounted = true
+    // 调用 mounted 钩子函数
     callHook(vm, 'mounted')
   }
   return vm

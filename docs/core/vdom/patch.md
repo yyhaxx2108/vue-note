@@ -205,7 +205,7 @@ export function createPatchFunction (backend) {
           insert(parentElm, vnode.elm, refElm)
         }
       } else {
-        // 创建子节点，这里
+        // 创建子节点，这里 children 是 vnode 的 children
         createChildren(vnode, children, insertedVnodeQueue)
         // 判读是否定义了 data 
         if (isDef(data)) {
@@ -636,13 +636,15 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 调用插入钩子函数，queue 为子组件 vnode 组成的数组
   function invokeInsertHook (vnode, queue, initial) {
-    // delay insert hooks for component root nodes, invoke them after the
-    // element is really inserted
+    // 延迟往根组件中插入钩子函数，在元素真实插入值之后调用他
     if (isTrue(initial) && isDef(vnode.parent)) {
       vnode.parent.data.pendingInsert = queue
     } else {
+      // 遍历 queue，进行 insert 钩子操作
       for (let i = 0; i < queue.length; ++i) {
+        // 进行 insert 钩子操作，该钩子合并了 componentVNodeHooks 中的钩子函数
         queue[i].data.hook.insert(queue[i])
       }
     }
@@ -770,7 +772,7 @@ export function createPatchFunction (backend) {
       return
     }
 
-    // 定义一个 isInitialPatch，并且将其初始值设置为false
+    // 定义一个 isInitialPatch，并且将其初始值设置为false，该属性会在 invokeInsertHook 中传入
     let isInitialPatch = false
     // 定义一个 insertedVnodeQueue 空数组
     const insertedVnodeQueue = []
@@ -883,6 +885,7 @@ export function createPatchFunction (backend) {
       }
     }
 
+    // 调用 invokeInsertHook 钩子函数
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
     // 将新生成的节点返回
     return vnode.elm

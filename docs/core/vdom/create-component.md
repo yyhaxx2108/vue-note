@@ -71,9 +71,13 @@ const componentVNodeHooks = {
   },
 
   insert (vnode: MountedComponentVNode) {
+    // 将 context 和 componentInstance 保存下来
     const { context, componentInstance } = vnode
+    // 如果 !componentInstance._isMounted 说明该组件实例还没有挂载，进行挂载处理
     if (!componentInstance._isMounted) {
+      // 将是已经挂载的标记设置为 true
       componentInstance._isMounted = true
+      // 调用 mounted 方法
       callHook(componentInstance, 'mounted')
     }
     if (vnode.data.keepAlive) {
