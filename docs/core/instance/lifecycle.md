@@ -29,8 +29,9 @@ export function initLifecycle (vm: Component) {
   // 引用 vm.$options 到 options，并且后面都是使用 options
   const options = vm.$options
 
-  // 定义 parent 值为 options.parent，
-  // options.parent 除了可以通过 options 传入外，另一个生成途径来自createComponentInstanceForVnode
+  // 定义 parent 值为 options.parent
+  // options.parent 除了可以通过 options 传入外，
+  // 另一个生成途径来自createComponentInstanceForVnode，而此时为 activeInstance
   let parent = options.parent
   if (parent && !options.abstract) {
     // 如果当前实例有父组件，且当前实例不是抽象的
@@ -77,7 +78,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const prevActiveInstance = activeInstance
     // 将当前实例赋值到 activeInstance 上
     activeInstance = vm
-    // 将 vnode 赋值给 vm._vnode
+    // 将 vnode 赋值给 vm._vnode，vnode 为渲染vnode 和 $vnode 是父子关系
     vm._vnode = vnode
     // Vue.prototype.__patch__ 会在入口点被注入，用于不同环境进行补丁算法
     // 判断 prevVnode 是否存在
@@ -90,7 +91,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
-    // 将 activeInstance 还原成 prevActiveInstance
+    // 将 activeInstance 还原成 prevActiveInstance，activeInstance 和 prevActiveInstance 是父子关系
     activeInstance = prevActiveInstance
     // update __vue__ reference
     if (prevEl) {

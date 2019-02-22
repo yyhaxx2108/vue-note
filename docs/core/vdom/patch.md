@@ -1,18 +1,6 @@
 # patch
 
 ```javascript
-/**
- * Virtual DOM patching algorithm based on Snabbdom by
- * Simon Friis Vindum (@paldepind)
- * Licensed under the MIT License
- * https://github.com/paldepind/snabbdom/blob/master/LICENSE
- *
- * modified by Evan You (@yyx990803)
- *
- * Not type-checking this because this file is perf-critical and the cost
- * of making flow understand it is not worth it.
- */
-
 import VNode, { cloneVNode } from './vnode'
 import config from '../config'
 import { SSR_ATTR } from 'shared/constants'
@@ -244,7 +232,8 @@ export function createPatchFunction (backend) {
       insert(parentElm, vnode.elm, refElm)
     }
   }
-
+  
+  // 创建组件
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     // 保存 vnode.data 到节点 i 上
     let i = vnode.data
@@ -261,6 +250,7 @@ export function createPatchFunction (backend) {
       // 子组件也会将原来的组件替换掉，正式如此，我们只需要将节点返回就完成了
       if (isDef(vnode.componentInstance)) {
         // 如果存在 vnode.componentInstance，首先调用 initComponent 方法
+        // 该方法会将 vnode.componentInstance.$el 赋值给 vnode.elm
         initComponent(vnode, insertedVnodeQueue)
         // 将 vnode.elm 插入 refElm 前
         insert(parentElm, vnode.elm, refElm)
@@ -278,6 +268,7 @@ export function createPatchFunction (backend) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
       vnode.data.pendingInsert = null
     }
+    // 将 vnode.componentInstance.$el 的值返回给 vnode.elm，该值是一个 Dom
     vnode.elm = vnode.componentInstance.$el
     if (isPatchable(vnode)) {
       invokeCreateHooks(vnode, insertedVnodeQueue)
@@ -315,7 +306,7 @@ export function createPatchFunction (backend) {
 
   // 插入节点，parent 为父节点，elm 为当前会插入的节点，ref 为参考节点
   function insert (parent, elm, ref) {
-    // 如果定义了 parent
+    // 如果未定义了 parent，将不会进行插入操作
     if (isDef(parent)) {
       // 判断是否定义了 ref
       if (isDef(ref)) {

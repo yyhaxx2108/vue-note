@@ -47,13 +47,13 @@ const componentVNodeHooks = {
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
-      // 创建一个实例
+      // 调用 createComponentInstanceForVnode 创建一个实例
       // activeInstance 为当前正在渲染的实例的引用
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
       )
-      // 挂载这个实例
+      // 手动挂载这个实例
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
@@ -200,6 +200,10 @@ export function createComponent (
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
+  // 生成 vnode，tag 为 vue-component-开头是组件
+  // 该组件里面的 children 是空
+  // componentOptions 是 { Ctor, propsData, listeners, tag, children }
+  // asyncFactory 是异步组件
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,
@@ -210,16 +214,16 @@ export function createComponent (
   // Weex specific: invoke recycle-list optimized @render function for
   // extracting cell-slot template.
   // https://github.com/Hanks10100/weex-native-directive/tree/master/component
-  /* istanbul ignore if */
   if (__WEEX__ && isRecyclableComponent(vnode)) {
     return renderRecyclableComponentTemplate(vnode)
   }
 
+  // 返回 vnode
   return vnode
 }
 
-// 实例化子组件
-// parent 为当前正在渲染的实例的引用
+// 实例化子组件，返回的是一个 vm 实例
+// vnode 为当前组件的 vnode，parent 为 activeInstance 即当前正在渲染的实例的引用
 export function createComponentInstanceForVnode (
   vnode: any,
   parent: any,
@@ -236,7 +240,7 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
-  // 实例化自组件的构造函数
+  // 实例化自组件的构造函数，实际上执行的是 sub 的构造函数
   return new vnode.componentOptions.Ctor(options)
 }
 

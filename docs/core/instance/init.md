@@ -66,7 +66,8 @@ export function initMixin (Vue: Class<Component>) {
     initEvents(vm)
     // 初始化Render相关
     initRender(vm)
-    // 调用 beforeCreate 函数
+    // 调用 beforeCreate 钩子函数，此时拿不了 data 这些数据
+    // vue-router、vuex 会在此混入一些逻辑
     callHook(vm, 'beforeCreate')
     // 初始化inject
     initInjections(vm)
@@ -74,7 +75,7 @@ export function initMixin (Vue: Class<Component>) {
     initState(vm)
     // 初始化provide
     initProvide(vm)
-    // 调用 created 函数
+    // 调用 created 钩子函数
     callHook(vm, 'created')
 
     // 性能测量相关，与之前代码相对应
@@ -91,7 +92,7 @@ export function initMixin (Vue: Class<Component>) {
   }
 }
 
-// 初始化内部组件
+// 初始化内部组件，此时 vm 是子组件
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   // 以 vm.constructor.options 为原型对象创造一个空对象，并且赋值给vm.$options
   const opts = vm.$options = Object.create(vm.constructor.options)

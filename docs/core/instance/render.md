@@ -71,19 +71,21 @@ export function renderMixin (Vue: Class<Component>) {
     // 将 Vue 实例保存到 vm 上
     const vm: Component = this
     // 将 vm.$options.render 和 vm.$options._parentVnode 分别保存到 render 和 _parentVnode 上
+    // _parentVnode 为占位符的 vnode 
     const { render, _parentVnode } = vm.$options
 
+    // 如果存在占位符 _parentVnode
     if (_parentVnode) {
+      // 将 vm.$scopedSlots设置为 _parentVnode.data.scopedSlots 或 空对象
       vm.$scopedSlots = _parentVnode.data.scopedSlots || emptyObject
     }
 
-    // set parent vnode. this allows render functions to have access
-    // to the data on the placeholder node.
+    // 设置占位符 vnode，这允许渲染方法有权限访问占位符 vnode 上面的数据
     vm.$vnode = _parentVnode
     // render self
     let vnode
     try {
-      // 调用 render 方法生成 vnode
+      // 调用 render 方法生成 vnode，渲染 vnode
       // vm._renderProxy 在生产环境下就是 vm，在开发环境是 proxy 对象
       // vm.$createElement 在 initRender 中定义
       vnode = render.call(vm._renderProxy, vm.$createElement)
@@ -116,8 +118,9 @@ export function renderMixin (Vue: Class<Component>) {
       // 创建一个空白组件
       vnode = createEmptyVNode()
     }
-    // set parent
+    // 渲染 vnode 的 parent 指向占位符vnode
     vnode.parent = _parentVnode
+    // 将渲染 vnode 返回
     return vnode
   }
 }
