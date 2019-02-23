@@ -263,8 +263,12 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 初始化 Component
   function initComponent (vnode, insertedVnodeQueue) {
+    // pendingInsert 可能在 invokeInsertHook 初始化
     if (isDef(vnode.data.pendingInsert)) {
+      // apply 的第二个参数是数组，可以用来拍平数组
+      // 将 vnode.data.pendingInsert 的元素拍平到 insertedVnodeQueue
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
       vnode.data.pendingInsert = null
     }
@@ -277,7 +281,7 @@ export function createPatchFunction (backend) {
       // empty component root.
       // skip all element-related modules except for ref (#3455)
       registerRef(vnode)
-      // make sure to invoke the insert hook
+      // 确保调用插入钩子函数
       insertedVnodeQueue.push(vnode)
     }
   }
@@ -820,6 +824,7 @@ export function createPatchFunction (backend) {
             }
           }
           // 如果不是服务端渲染，或者服务端渲染出错，创建一个空节点(虚拟 vnode )替换 oldVnode
+          // oldVnode 上 elm 是传入的 oldVnode
           oldVnode = emptyNodeAt(oldVnode)
         }
 
