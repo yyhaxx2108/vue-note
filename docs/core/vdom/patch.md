@@ -890,7 +890,7 @@ export function createPatchFunction (backend) {
       }
     }
 
-    // 调用 invokeInsertHook 钩子函数
+    // 调用 invokeInsertHook 钩子函数, 该方法会执行 mounted 钩子
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
     // 将新生成的节点返回
     return vnode.elm

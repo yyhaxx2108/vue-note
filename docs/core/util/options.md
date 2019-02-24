@@ -445,35 +445,41 @@ export function mergeOptions (
   return options
 }
 
-/**
- * Resolve an asset.
- * This function is used because child instances need access
- * to assets defined in its ancestor chain.
- */
+// 解析一个静态资源
+// 这个方法可以让子实例访问到祖先组件定义的静态资源
 export function resolveAsset (
   options: Object,
   type: string,
   id: string,
   warnMissing?: boolean
 ): any {
+  // 如果传入的健不是字符串，直接返回
   if (typeof id !== 'string') {
     return
   }
+  // 将 options 上的资源保存到 assets 上
   const assets = options[type]
-  // check local registration variations first
+  // 如果 assets 上存在 id 相关的值，直接返回 assets[id]
   if (hasOwn(assets, id)) return assets[id]
+  // 将 id 进行小驼峰处理
   const camelizedId = camelize(id)
+  // 如果 assets 上存在 id 小驼峰后相关的值，返回 assets[camelizedId]
   if (hasOwn(assets, camelizedId)) return assets[camelizedId]
+  // 将 id 进行大驼峰处理
   const PascalCaseId = capitalize(camelizedId)
+  // 如果 assets 上存在 id 大驼峰后相关的值，返回 assets[PascalCaseId]
   if (hasOwn(assets, PascalCaseId)) return assets[PascalCaseId]
-  // fallback to prototype chain
+  // 到原型链上面进行查找
   const res = assets[id] || assets[camelizedId] || assets[PascalCaseId]
+  // 在非生产环境中
   if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
+    // 如果不存在 res，报警告
     warn(
       'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
       options
     )
   }
+  // 返回 res
   return res
 }
 

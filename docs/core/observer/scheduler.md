@@ -59,7 +59,9 @@ function flushSchedulerQueue () {
   // as we run existing watchers
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
+    // 如果存在 watcher.before，执行 watcher.before
     if (watcher.before) {
+      // 该函数可能是调用 beforeUpdate
       watcher.before()
     }
     id = watcher.id
@@ -104,7 +106,11 @@ function callUpdatedHooks (queue) {
   while (i--) {
     const watcher = queue[i]
     const vm = watcher.vm
+    // vm._watcher === watcher 说明该 Wather 是渲染 watcher
+    // vm._isMounted 为 true 说明已经挂载
+    // vm._isDestroyed 为 false 说明该 watcher 没有被销毁
     if (vm._watcher === watcher && vm._isMounted && !vm._isDestroyed) {
+      // 执行 updated 钩子函数
       callHook(vm, 'updated')
     }
   }
