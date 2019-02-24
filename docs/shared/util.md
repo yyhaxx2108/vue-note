@@ -290,14 +290,17 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
   return -1
 }
 
-/**
- * Ensure a function is called only once.
- */
+// 确保函数只执行一次
 export function once (fn: Function): Function {
+  // 定义局部变量 called 为 false
   let called = false
+  // 闭包返回一个函数
   return function () {
+    // 如果 called 为 false
     if (!called) {
+      // 将 called 设置为 true
       called = true
+      // 调用 fn 函数，并且将 arguments 传入
       fn.apply(this, arguments)
     }
   }

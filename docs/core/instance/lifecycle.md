@@ -110,8 +110,11 @@ export function lifecycleMixin (Vue: Class<Component>) {
 
   // 在 Vue.prototype 上定义了 $forceUpdate 方法
   Vue.prototype.$forceUpdate = function () {
+    // 缓存 this 到 vm
     const vm: Component = this
+    // 如果存在 vm._watcher
     if (vm._watcher) {
+      // 调用 vm._watcher.update()，该函数会调用 getter
       vm._watcher.update()
     }
   }

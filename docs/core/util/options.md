@@ -1,7 +1,6 @@
 # options
 这个文件的主要作用是将父组件配置和子组件配置合并到一起并返回
 
-
 ```javascript
 
 import config from '../config'
