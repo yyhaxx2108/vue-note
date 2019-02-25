@@ -37,7 +37,7 @@ export default class Dep {
   depend () {
     // 这里继续判断 Dep.target 是否有值的原因是 depend 不仅仅在 get 中调用
     if (Dep.target) {
-      // Dep.target 其实就是一个 Wathcer实例
+      // Dep.target 其实就是一个 Wathcer 的实例
       Dep.target.addDep(this)
     }
   }
