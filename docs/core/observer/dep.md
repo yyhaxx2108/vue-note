@@ -42,6 +42,7 @@ export default class Dep {
     }
   }
 
+  // 派发更新
   notify () {
     // 复制 subs 数组，subs里面存放的是 watcher 实例
     const subs = this.subs.slice()
