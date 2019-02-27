@@ -6,6 +6,7 @@ import { noop } from 'shared/util'
 import { handleError } from './error'
 import { isIOS, isNative } from './env'
 
+// 定义回调队列
 const callbacks = []
 // 代表回调队列是否等待刷新状态，初始时为否
 let pending = false
@@ -41,9 +42,13 @@ if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   MessageChannel.toString() === '[object MessageChannelConstructor]'
 )) {
   // 第二选择是 MessageChannel， MessageChannel 也不用做超时检测
+  // 实例化一个 MessageChannel
   const channel = new MessageChannel()
+  // 定义 channel.port2
   const port = channel.port2
+  // 定义 channel.port1 的 onmessage 回调
   channel.port1.onmessage = flushCallbacks
+  // 将 包装有 port.postMessage(1) 的方法赋值给 macroTimerFunc
   macroTimerFunc = () => {
     port.postMessage(1)
   }
@@ -82,6 +87,7 @@ export function withMacroTask (fn: Function): Function {
   })
 }
 
+// nextTick 实现
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   // 将匿名函数 push 到 callbacks，此时 cb 并不会立即执行
@@ -112,6 +118,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
   }
   // 如果不存在回调，且支持promise
   if (!cb && typeof Promise !== 'undefined') {
+    // 返回一个 promise 实例
     return new Promise(resolve => {
       _resolve = resolve
     })

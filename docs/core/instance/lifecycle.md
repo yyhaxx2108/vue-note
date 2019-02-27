@@ -88,7 +88,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       // vnode 传入的 vnode(虚拟dom)，hydrating 是否为服务端渲染，最后一个参数为 removeOnly
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false)
     } else {
-      // updates
+      // 如果存在 prevVnode，说明是更新节点，传入参数为 prevVnode，vnode
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     // 将 activeInstance 还原成 prevActiveInstance，activeInstance 和 prevActiveInstance 是父子关系

@@ -58,8 +58,11 @@ const componentVNodeHooks = {
     }
   },
 
+  // 预 patch
   prepatch (oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
+    // 将 vnode.componentOptions 保存到 options 上
     const options = vnode.componentOptions
+    // 将 oldVnode.componentInstance 保存到 vnode.componentInstance 上
     const child = vnode.componentInstance = oldVnode.componentInstance
     updateChildComponent(
       child,

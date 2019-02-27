@@ -82,6 +82,7 @@ export function isUnknownElement (tag: string): boolean {
   }
 }
 
+// 返回是否为 text,number,password,search,email,tel,url 中的一个
 export const isTextInputType = makeMap('text,number,password,search,email,tel,url')
 
 ```

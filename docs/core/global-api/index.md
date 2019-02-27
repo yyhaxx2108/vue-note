@@ -42,6 +42,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // Vue 上添加了三个属性分别是 set、delete、nextTick
   Vue.set = set
   Vue.delete = del
+  // 将 nextTick 添加成 Vue 的 api
   Vue.nextTick = nextTick
 
   // 在 Vue 上添加 options 对象

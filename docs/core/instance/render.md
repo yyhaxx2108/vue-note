@@ -63,6 +63,7 @@ export function renderMixin (Vue: Class<Component>) {
 
   // 在 Vue.prototype 上定义了 $nextTick 方法
   Vue.prototype.$nextTick = function (fn: Function) {
+    // 返回 nextTick 的调用
     return nextTick(fn, this)
   }
 
