@@ -65,6 +65,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       return compiled
     }
 
+    // 返回一个对象
     return {
       compile,
       compileToFunctions: createCompileToFunctionFn(compile)
