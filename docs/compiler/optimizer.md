@@ -137,10 +137,10 @@ function isStatic (node: ASTNode): boolean {
   // 即不是自定义标签，并且不直接在 TemplateFor 中, 并且 node 对象的键值都在 
   // ["type", "tag", "attrsList", "attrsMap", "parent", "children", "plain", "attrs", "staticClass"]中
   return !!(node.pre || (
-    !node.hasBindings && // no dynamic bindings
-    !node.if && !node.for && // not v-if or v-for or v-else
-    !isBuiltInTag(node.tag) && // not a built-in
-    isPlatformReservedTag(node.tag) && // not a component
+    !node.hasBindings &&
+    !node.if && !node.for && 
+    !isBuiltInTag(node.tag) &&
+    isPlatformReservedTag(node.tag) &&
     !isDirectChildOfTemplateFor(node) &&
     Object.keys(node).every(isStaticKey)
   ))
