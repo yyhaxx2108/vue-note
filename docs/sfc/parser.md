@@ -119,5 +119,4 @@ export function parseComponent (
 
   return sfc
 }
-
 ```
