@@ -182,9 +182,7 @@ export const bind = Function.prototype.bind
   ? nativeBind
   : polyfillBind
 
-/**
- * Convert an Array-like object to a real Array.
- */
+// 将一个类数组对象转化为真正的数组
 export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
   let i = list.length - start

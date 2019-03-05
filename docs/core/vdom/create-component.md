@@ -186,11 +186,10 @@ export function createComponent (
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
 
-  // extract listeners, since these needs to be treated as
-  // child component listeners instead of DOM listeners
+  // 在组件中，将 data.on 赋值成为 listeners，因为组件中的 on 是自定义事件而非原生 Dom 事件
   const listeners = data.on
-  // replace with listeners with .native modifier
-  // so it gets processed during parent component patch.
+  // 替换带有 native 修饰符的监听，因此他会在父组件的 patch 过程中得到处理
+  // 将 data.nativeOn 事件设置为原生事件
   data.on = data.nativeOn
 
   if (isTrue(Ctor.options.abstract)) {

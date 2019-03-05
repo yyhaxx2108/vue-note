@@ -20,13 +20,14 @@ export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
 // Firefox 中 Object.prototype上自带了 watch，所以需要判断是否为原生
 export const nativeWatch = ({}).watch
 
+// 将 supportsPassive 设置为 false
 export let supportsPassive = false
+// 在浏览器环境中, 尝试定义 passive，如果成功，将 supportsPassive 设置为true
 if (inBrowser) {
   try {
     const opts = {}
     Object.defineProperty(opts, 'passive', ({
       get () {
-        /* istanbul ignore next */
         supportsPassive = true
       }
     }: Object)) // https://github.com/facebook/flow/issues/285

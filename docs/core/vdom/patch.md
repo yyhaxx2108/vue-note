@@ -21,6 +21,7 @@ import {
 
 export const emptyNode = new VNode('', {}, [])
 
+// patch 的各个时段的钩子函数名称
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
 // 是否忽略子节点元素
@@ -81,15 +82,22 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
 
 // 创建 patch 函数的高阶函数，该函数会返回一个 patch 函数
 export function createPatchFunction (backend) {
+  // 声明 i，j 变量
   let i, j
+  // 声明一个空对象 cbs
   const cbs = {}
-
+  // 从 backend 读取传入的 modules 和 nodeOps
   const { modules, nodeOps } = backend
 
+  // 遍历 hooks
   for (i = 0; i < hooks.length; ++i) {
+    // 将 cbs 中 hooks[i] 设置为一个空对象
     cbs[hooks[i]] = []
+    // 遍历 modules
     for (j = 0; j < modules.length; ++j) {
+      // 如果定义了 modules[j][hooks[i]]
       if (isDef(modules[j][hooks[i]])) {
+        // 往 cbs[hooks[i]] 中 push modules[j][hooks[i]] 
         cbs[hooks[i]].push(modules[j][hooks[i]])
       }
     }
@@ -224,7 +232,6 @@ export function createPatchFunction (backend) {
         // 判读是否定义了 data 
         if (isDef(data)) {
           // 如果定义了 data，调用 invokeCreateHooks 钩子函数
-          //
           invokeCreateHooks(vnode, insertedVnodeQueue)
         }
         // 调用 insert 方法，插入 vnode.elm
@@ -289,6 +296,7 @@ export function createPatchFunction (backend) {
     // 将 vnode.componentInstance.$el 的值返回给 vnode.elm，该值是一个 Dom
     vnode.elm = vnode.componentInstance.$el
     if (isPatchable(vnode)) {
+      // 调用 invokeCreateHooks
       invokeCreateHooks(vnode, insertedVnodeQueue)
       setScope(vnode)
     } else {
@@ -373,13 +381,20 @@ export function createPatchFunction (backend) {
     return isDef(vnode.tag)
   }
 
+  // 调用 create 的钩子函数
   function invokeCreateHooks (vnode, insertedVnodeQueue) {
+    // 遍历 cbs 中的 create 数组
     for (let i = 0; i < cbs.create.length; ++i) {
+      // 调用 create 钩子函数，传入参数为 emptyNode 和 vnode
       cbs.create[i](emptyNode, vnode)
     }
-    i = vnode.data.hook // Reuse variable
+    // 将 vnode.data.hook 保存到 i 上，达到重用变量的效果
+    i = vnode.data.hook 
+    // 如果 i 上有值
     if (isDef(i)) {
+      // 如果存在 i.create，调用 i.create 并且传入 emptyNode 和 vnode
       if (isDef(i.create)) i.create(emptyNode, vnode)
+      // 如果存在 i.insert，将 vnode push 到 insertedVnodeQueue 队列中
       if (isDef(i.insert)) insertedVnodeQueue.push(vnode)
     }
   }

@@ -77,11 +77,15 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 // 包装函数，以便如果其中有任何代码触发状态更改
 // 使用 (macro) task 替换 microtask
 export function withMacroTask (fn: Function): Function {
+  // 返回 fn._withTask函数
   return fn._withTask || (fn._withTask = function () {
+    // 将 useMacroTask 设置为 true
     useMacroTask = true
     try {
+      // 尝试调用 fn，并且将其值返回 
       return fn.apply(null, arguments)
     } finally {
+      // 重新将 useMacroTask 设置为 false
       useMacroTask = false    
     }
   })
