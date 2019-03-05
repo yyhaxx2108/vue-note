@@ -56,7 +56,7 @@ export function generate (
 ): CodegenResult {
   // 通过 options 实例化 CodegenState 并且保存到 state
   const state = new CodegenState(options)
-  // 如果没有传入 ast，将 _c("div") 保存到 code 上，否则调用 genElement 获取 code
+  // 如果没有传入 ast，将 '_c("div")' 保存到 code 上，否则调用 genElement 获取 code
   const code = ast ? genElement(ast, state) : '_c("div")'
   // 将拼接好 render 和 staticRenderFns 的对象返回
   return {
@@ -86,6 +86,7 @@ export function genElement (el: ASTElement, state: CodegenState): string {
   } else if (el.for && !el.forProcessed) {
     return genFor(el, state)
   } else if (el.if && !el.ifProcessed) {
+    // 如果存在 el.if 且不存在 el.ifProcessed，调用 genIf，并且将其值返回
     return genIf(el, state)
   } else if (el.tag === 'template' && !el.slotTarget && !state.pre) {
     return genChildren(el, state) || 'void 0'
@@ -106,11 +107,13 @@ export function genElement (el: ASTElement, state: CodegenState): string {
         data = genData(el, state)
       }
 
+      // children 保存为 null(el.inlineTemplate为真时) 或 genChildren(el, state, true)
       const children = el.inlineTemplate ? null : genChildren(el, state, true)
+      // 拼接 _c 函数，并且保存到 code 上
       code = `_c('${el.tag}'${
-        data ? `,${data}` : '' // data
+        data ? `,${data}` : ''
       }${
-        children ? `,${children}` : '' // children
+        children ? `,${children}` : ''
       })`
     }
     // module transforms
@@ -186,7 +189,7 @@ export function genIf (
   altGen?: Function,
   altEmpty?: string
 ): string {
-  // 将 el.ifProcessed 设置为 true，避免死循环
+  // 将 el.ifProcessed 设置为 true，避免递归调用造成死循环
   el.ifProcessed = true
   // 调用 genIfConditions 处理 v-if 指令
   return genIfConditions(el.ifConditions.slice(), state, altGen, altEmpty)
@@ -273,7 +276,7 @@ export function genFor (
 
 // 生成 data，传入的参数分别是 节点描述对象 el 和编译状态描述对象 state
 export function genData (el: ASTElement, state: CodegenState): string {
-  // 初始化 data 为 ‘{’
+  // 初始化 data 为 ‘{’，后面会生成JSON字符串
   let data = '{'
 
   // 首先解析指令，因为指令解析前可以改变EL的其他属性。
@@ -459,6 +462,7 @@ function genForScopedSlot (
     '})'
 }
 
+// 生成 Children code
 export function genChildren (
   el: ASTElement,
   state: CodegenState,
@@ -466,18 +470,24 @@ export function genChildren (
   altGenElement?: Function,
   altGenNode?: Function
 ): string | void {
+  // 将 el.children 保存到 children 上
   const children = el.children
+  // 判断 children 是否存在
   if (children.length) {
+    // 读取第一个元素,并且保存到 el 上
     const el: any = children[0]
-    // optimize single v-for
+    // 优化单个 v-for
+    // 如果children的长度为 1，并且存在 el.for，并且 el.tag 不是 template 和 slot
     if (children.length === 1 &&
       el.for &&
       el.tag !== 'template' &&
       el.tag !== 'slot'
     ) {
-      // because el may be a functional component and return an Array instead of a single root.
-      // In this case, just a simple normalization is needed
+      // 因为 el 可能时函数组件，并且返回的是数组而不是单个节点
+      // 这种情况下，需要进行简单的 normalization
+      // 设置 normalizationType 为 ‘,1’ 或 ‘’
       const normalizationType = state.maybeComponent(el) ? `,1` : ``
+      // 返回 genElement生成的字符串加上 normalizationType
       return `${(altGenElement || genElement)(el, state)}${normalizationType}`
     }
     const normalizationType = checkSkip
