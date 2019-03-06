@@ -42,6 +42,7 @@ export function addRawAttr (el: ASTElement, name: string, value: any) {
   el.attrsList.push({ name, value })
 }
 
+// 添加指令操作 
 export function addDirective (
   el: ASTElement,
   name: string,

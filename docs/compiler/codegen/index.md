@@ -372,11 +372,17 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
   const dirs = el.directives
   // 如果不存在 dirs 直接返回
   if (!dirs) return
+  // 将 res 设置成字符串 'directives:['
   let res = 'directives:['
+  // 将 hasRuntime 设置成 false
   let hasRuntime = false
+  // 定义一些变量
   let i, l, dir, needRuntime
+  // 遍历dirs 
   for (i = 0, l = dirs.length; i < l; i++) {
+    // 保存 dirs 中的元素到 dir 中
     dir = dirs[i]
+    // 将 needRuntime 设置为 true 
     needRuntime = true
     const gen: DirectiveFunction = state.directives[dir.name]
     if (gen) {

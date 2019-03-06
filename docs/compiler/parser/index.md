@@ -816,6 +816,7 @@ function processAttrs (el) {
         addDirective(el, name, rawName, value, arg, modifiers)
         // 如果是 v-model 指令
         if (process.env.NODE_ENV !== 'production' && name === 'model') {
+          // 调用 checkForAliasModel 方法
           checkForAliasModel(el, value)
         }
       }
