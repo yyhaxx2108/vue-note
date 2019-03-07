@@ -173,8 +173,9 @@ export function createComponent (
   // component constructor creation
   resolveConstructorOptions(Ctor)
 
-  // transform component v-model data into props & events
+  // 如果存在 data.model
   if (isDef(data.model)) {
+    // 将组件上面的 v-model data 转化为 props & events
     transformModel(Ctor.options, data)
   }
 
@@ -289,24 +290,33 @@ function mergeHook (f1: any, f2: any): Function {
   return merged
 }
 
-// transform component v-model info (value and callback) into
-// prop and event handler respectively.
+// 将组件的 v-model 分别转化为元素上的值和回调方法
 function transformModel (options, data: any) {
+  // 将 options.model.prop 或 'value' 保存到 prop 上
   const prop = (options.model && options.model.prop) || 'value'
+  // 将 options.model.event 或 'input' 保存到 event 上
   const event = (options.model && options.model.event) || 'input'
+  // 将 data.model.value 保存到 data.props 上
   ;(data.props || (data.props = {}))[prop] = data.model.value
+  // 保存 data.on 到 on 上面
   const on = data.on || (data.on = {})
+  // 读取已经存在了的 event 事件
   const existing = on[event]
+  // 保存 callback 回调
   const callback = data.model.callback
+  // 判断 existing 是否存在
   if (isDef(existing)) {
+    // 如果存在，判断 existing 是否为数组, 如果是数组并且，该数组不存在 callback，或不是数组，且 existing 和 callback 不想等
     if (
       Array.isArray(existing)
         ? existing.indexOf(callback) === -1
         : existing !== callback
     ) {
+      // 将 callback 和 existing进行拼接
       on[event] = [callback].concat(existing)
     }
   } else {
+    // 如果不存在，直接将 callback 存到 on[event] 上
     on[event] = callback
   }
 }

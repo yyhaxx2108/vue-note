@@ -2,29 +2,36 @@
 
 ```javascript
 
-/**
- * Cross-platform code generation for component v-model
- */
+// 生成跨平台的组件相关的 v-model
 export function genComponentModel (
   el: ASTElement,
   value: string,
   modifiers: ?ASTModifiers
 ): ?boolean {
+  // 取出修饰符
   const { number, trim } = modifiers || {}
 
+  // 将 baseValueExpression 设置为 '$$v'
   const baseValueExpression = '$$v'
+  // 将 valueExpression 设置为 baseValueExpression
   let valueExpression = baseValueExpression
+  // 如果存在 trim
   if (trim) {
+    // 如果 valueExpression 是字符串，则将加上去除空格的逻辑字符串
     valueExpression =
       `(typeof ${baseValueExpression} === 'string'` +
       `? ${baseValueExpression}.trim()` +
       `: ${baseValueExpression})`
   }
+  // 如果存在 number 修饰器
   if (number) {
+    // 将 valueExpression 通过 _n 处理后返回
     valueExpression = `_n(${valueExpression})`
   }
+  // 调用 genAssignmentCode 方法，生成 assignment 字符传
   const assignment = genAssignmentCode(value, valueExpression)
 
+  // 将 el.model 赋值成一个由 value、expression、callback构成的对象
   el.model = {
     value: `(${value})`,
     expression: `"${value}"`,

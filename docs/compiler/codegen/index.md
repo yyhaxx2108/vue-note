@@ -335,8 +335,9 @@ export function genData (el: ASTElement, state: CodegenState): string {
   if (el.scopedSlots) {
     data += `${genScopedSlots(el.scopedSlots, state)},`
   }
-  // component v-model
+  // 如果组件存在 v-model
   if (el.model) {
+    // 将 data 拼接成为以下对象字符串
     data += `model:{value:${
       el.model.value
     },callback:${

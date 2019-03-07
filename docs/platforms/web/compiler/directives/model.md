@@ -41,8 +41,9 @@ export default function model (
 
   // 判读 el 的类型
   if (el.component) {
+    // 如果 el 是组件, 调用 genComponentModel
     genComponentModel(el, value, modifiers)
-    // component v-model doesn't need extra runtime
+    // 返回值是 false，因为组件的 v-model 不需要额外的存在在运行时中
     return false
   } else if (tag === 'select') {
     genSelect(el, value, modifiers)
@@ -54,8 +55,9 @@ export default function model (
     // 如果调用的节点为文本框,那么调用 genDefaultModel
     genDefaultModel(el, value, modifiers)
   } else if (!config.isReservedTag(tag)) {
+    // 如果 el 不是保留的标签，那么当中组件处理, 调用 genComponentModel
     genComponentModel(el, value, modifiers)
-    // component v-model doesn't need extra runtime
+    // 返回值是 false，因为组件的 v-model 不需要额外的存在在运行时中
     return false
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
