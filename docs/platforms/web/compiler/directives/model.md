@@ -12,20 +12,25 @@ let warn
 export const RANGE_TOKEN = '__r'
 export const CHECKBOX_RADIO_TOKEN = '__c'
 
+// v-model 指令的方法
 export default function model (
   el: ASTElement,
   dir: ASTDirective,
   _warn: Function
 ): ?boolean {
+  // 缓存警告函数
   warn = _warn
+  // 缓存指令的值
   const value = dir.value
+  // 缓存修饰器到 modifiers
   const modifiers = dir.modifiers
+  // 缓存 el.tag 到 tag
   const tag = el.tag
+  // 缓存 el.attrsMap.type 到 type
   const type = el.attrsMap.type
 
   if (process.env.NODE_ENV !== 'production') {
-    // inputs with type="file" are read only and setting the input's
-    // value will throw an error.
+    // input 中 type 为 file，将报警告, 因为 file 为只读的
     if (tag === 'input' && type === 'file') {
       warn(
         `<${el.tag} v-model="${value}" type="file">:\n` +
@@ -34,6 +39,7 @@ export default function model (
     }
   }
 
+  // 判读 el 的类型
   if (el.component) {
     genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
@@ -45,6 +51,7 @@ export default function model (
   } else if (tag === 'input' && type === 'radio') {
     genRadioModel(el, value, modifiers)
   } else if (tag === 'input' || tag === 'textarea') {
+    // 如果调用的节点为文本框,那么调用 genDefaultModel
     genDefaultModel(el, value, modifiers)
   } else if (!config.isReservedTag(tag)) {
     genComponentModel(el, value, modifiers)
@@ -59,7 +66,7 @@ export default function model (
     )
   }
 
-  // ensure runtime directive metadata
+  // 返回 true，确保运行时返回组件元数据
   return true
 }
 
@@ -123,20 +130,26 @@ function genSelect (
   addHandler(el, 'change', code, null, true)
 }
 
+// 文本框 v-model 逻辑
 function genDefaultModel (
   el: ASTElement,
   value: string,
   modifiers: ?ASTModifiers
 ): ?boolean {
+  // 将 el.attrsMap.type 进行保存
   const type = el.attrsMap.type
 
-  // warn if v-bind:value conflicts with v-model
-  // except for inputs with v-bind:type
+  // 如果绑定了 value 将会和 v-model 冲突, 希望绑定 type
   if (process.env.NODE_ENV !== 'production') {
+    // 缓存绑定的value值
     const value = el.attrsMap['v-bind:value'] || el.attrsMap[':value']
+    // 缓存绑定的typeBinding值
     const typeBinding = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
+    // 如果只绑定了 value，未绑定 typeBinding
     if (value && !typeBinding) {
+      // 缓存banding字符串
       const binding = el.attrsMap['v-bind:value'] ? 'v-bind:value' : ':value'
+      // 报警告
       warn(
         `${binding}="${value}" conflicts with v-model on the same element ` +
         'because the latter already expands to a value binding internally'
@@ -144,28 +157,38 @@ function genDefaultModel (
     }
   }
 
+  // 保存 modifiers 中的修饰符
   const { lazy, number, trim } = modifiers || {}
+  // 在 !lazy && type !== 'range' 的环境下将 needCompositionGuard 设置为 true
   const needCompositionGuard = !lazy && type !== 'range'
+  // 在 lazy 为真时，将 event 设置为 change，
+  // 在 lazy 为假时，如果 type 为 range，则将 event 设置为 __r，否则就设置为 input
   const event = lazy
     ? 'change'
     : type === 'range'
       ? RANGE_TOKEN
       : 'input'
 
+  // 将值的表达式设置为 '$event.target.value'
   let valueExpression = '$event.target.value'
+  // 如果传入了 trim 修饰符
   if (trim) {
+    // 将 valueExpression 设置为 `$event.target.value.trim()`
     valueExpression = `$event.target.value.trim()`
   }
+  // 如果传入了 number
   if (number) {
+    // 将 valueExpression 设置为 `_n(${valueExpression})`
     valueExpression = `_n(${valueExpression})`
   }
-
+  // 生成 code
   let code = genAssignmentCode(value, valueExpression)
   if (needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
-
+  // 给 el 添加 value 值属性，值为 `(${value})`
   addProp(el, 'value', `(${value})`)
+  // 给 el 添加一个事件，事件的回调函数久违code  
   addHandler(el, event, code, null, true)
   if (trim || number) {
     addHandler(el, 'blur', '$forceUpdate()')

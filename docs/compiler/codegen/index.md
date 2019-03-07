@@ -384,14 +384,19 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
     dir = dirs[i]
     // 将 needRuntime 设置为 true 
     needRuntime = true
+    // 获取指令对应的方法
+    // 当 dir.name 为 model, DirectiveFunction 即为平台的 model 方法
     const gen: DirectiveFunction = state.directives[dir.name]
+    // 如果有指令对应的方法
     if (gen) {
-      // compile-time directive that manipulates AST.
-      // returns true if it also needs a runtime counterpart.
+      // 运行时的指令会操纵AST, 如果在运行时也有对应部分，将返回 true
       needRuntime = !!gen(el, dir, state.warn)
     }
+    // 如果处于运行时
     if (needRuntime) {
+      // 将 hasRuntime 设置为 true
       hasRuntime = true
+      // 拼接 res 返回对象字符串
       res += `{name:"${dir.name}",rawName:"${dir.rawName}"${
         dir.value ? `,value:(${dir.value}),expression:${JSON.stringify(dir.value)}` : ''
       }${
@@ -401,7 +406,9 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
       }},`
     }
   }
+  // 如果 hasRuntime 为 true
   if (hasRuntime) {
+    // 将 res 删除最后一个‘,’，并且加上 ‘]’ 返回
     return res.slice(0, -1) + ']'
   }
 }

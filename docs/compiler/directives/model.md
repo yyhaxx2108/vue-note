@@ -1,7 +1,6 @@
 # model
 
 ```javascript
-/* @flow */
 
 /**
  * Cross-platform code generation for component v-model
@@ -38,10 +37,14 @@ export function genAssignmentCode (
   value: string,
   assignment: string
 ): string {
+  // 调用 parseModel 方法，并且将其值返回到 res 上
   const res = parseModel(value)
+  // 判读 res 中是否存在 key
   if (res.key === null) {
+    // 如果不存在，返回代码片段 `${value}=${assignment}`
     return `${value}=${assignment}`
   } else {
+    // 如果存在，返回代码片段 `$set(${res.exp}, ${res.key}, ${assignment})`
     return `$set(${res.exp}, ${res.key}, ${assignment})`
   }
 }
