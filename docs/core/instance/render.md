@@ -25,7 +25,9 @@ export function initRender (vm: Component) {
   const options = vm.$options
   // 父组件中占位标签
   const parentVnode = vm.$vnode = options._parentVnode
+  // 获取 parentVnode.context，并且将其保存到 renderContext 上
   const renderContext = parentVnode && parentVnode.context
+  // 调用 resolveSlots，并且将其返回值赋予 vm.$slots
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
   // 将 vm.$scopedSlots 赋值成为一个空对象
   vm.$scopedSlots = emptyObject

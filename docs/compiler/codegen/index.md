@@ -91,6 +91,7 @@ export function genElement (el: ASTElement, state: CodegenState): string {
   } else if (el.tag === 'template' && !el.slotTarget && !state.pre) {
     return genChildren(el, state) || 'void 0'
   } else if (el.tag === 'slot') {
+    // 如果 el.tag === 'slot'，那么调用 genSlot 生成，并返回
     return genSlot(el, state)
   } else {
     // 不满足以上条件，说明el 为普通的节点
@@ -326,13 +327,14 @@ export function genData (el: ASTElement, state: CodegenState): string {
   if (el.nativeEvents) {
     data += `${genHandlers(el.nativeEvents, true)},`
   }
-  // slot target
-  // only for non-scoped slots
+  // 如果存在 slotTarget，且不存在 slotScope
   if (el.slotTarget && !el.slotScope) {
+    // 在 data 上 追加 `slot:${el.slotTarget},` 字符串
     data += `slot:${el.slotTarget},`
   }
-  // scoped slots
+  // 如果存在 el.scopedSlots
   if (el.scopedSlots) {
+    // 将 ${genScopedSlots(el.scopedSlots, state)}, 保存到 data 上
     data += `${genScopedSlots(el.scopedSlots, state)},`
   }
   // 如果组件存在 v-model
@@ -431,25 +433,33 @@ function genInlineTemplate (el: ASTElement, state: CodegenState): ?string {
   }
 }
 
+// 生成带作用域的 slot 字符串
 function genScopedSlots (
   slots: { [key: string]: ASTElement },
   state: CodegenState
 ): string {
+  // 遍历 slots，并且调用 genScopedSlot 生成 slots 字符串
   return `scopedSlots:_u([${
+    // 遍历 slots
     Object.keys(slots).map(key => {
+      // 调用 genScopedSlot 生成 slots 字符串
       return genScopedSlot(key, slots[key], state)
     }).join(',')
   }])`
 }
 
+// 调用 genScopedSlot 生成带作用域的 slot 字符串
 function genScopedSlot (
   key: string,
   el: ASTElement,
   state: CodegenState
 ): string {
+  // 如果存在 el.for，并且没有处理过 for 相关的逻辑
   if (el.for && !el.forProcessed) {
+    // 调用 genForScopedSlot，并且将其返回
     return genForScopedSlot(key, el, state)
   }
+  // 构造 fn 函数
   const fn = `function(${String(el.slotScope)}){` +
     `return ${el.tag === 'template'
       ? el.if
@@ -457,6 +467,7 @@ function genScopedSlot (
         : genChildren(el, state) || 'undefined'
       : genElement(el, state)
     }}`
+  // 返回由 key 和 fn 构成的对象字符串
   return `{key:${key},fn:${fn}}`
 }
 
@@ -566,11 +577,17 @@ export function genComment (comment: ASTText): string {
   return `_e(${JSON.stringify(comment.text)})`
 }
 
+// 生成 slot 代码
 function genSlot (el: ASTElement, state: CodegenState): string {
+  // 如果 slotName 不存在，将其值默认为 '"default"'
   const slotName = el.slotName || '"default"'
+  // 调用 genChildren 生成 children, chilren 为作为插槽的默认内容
   const children = genChildren(el, state)
+  // 将 chilren 转化为字符串
   let res = `_t(${slotName}${children ? `,${children}` : ''}`
+  // 拼接插槽节点的属性, 拼接到 attrs 上
   const attrs = el.attrs && `{${el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')}}`
+  // 读取 bind 的值
   const bind = el.attrsMap['v-bind']
   if ((attrs || bind) && !children) {
     res += `,null`
