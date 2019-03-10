@@ -52,6 +52,7 @@ function pruneCacheEntry (
 const patternTypes: Array<Function> = [String, RegExp, Array]
 
 export default {
+  // 定义name
   name: 'keep-alive',
   // 抽象组件
   abstract: true,
