@@ -1,7 +1,6 @@
 # keep-alive
 
 ```javascript
-
 import { isRegExp, remove } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
