@@ -251,6 +251,7 @@ export function mountComponent (
     // 调用 mounted 钩子函数
     callHook(vm, 'mounted')
   }
+  // 返回 vm 实例
   return vm
 }
 

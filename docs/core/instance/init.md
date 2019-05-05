@@ -64,7 +64,7 @@ export function initMixin (Vue: Class<Component>) {
     initLifecycle(vm)
     // 初始化一些事件相关的属性
     initEvents(vm)
-    // 初始化Render相关
+    // 初始化 Render 相关
     initRender(vm)
     // 调用 beforeCreate 钩子函数，此时拿不了 data 这些数据
     // vue-router、vuex 会在此混入一些逻辑

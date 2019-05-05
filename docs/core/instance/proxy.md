@@ -99,7 +99,7 @@ if (process.env.NODE_ENV !== 'production') {
     if (hasProxy) {
       // vm.$options 的引用
       const options = vm.$options
-      // 如果 options.render._withStripped为true，那么就是getHandler，否值就是hasHandler
+      // 如果 options.render._withStripped 为 true，那么就是 getHandler，否值就是 hasHandler
       // 当手写 render 函数时，为了捕获到错误，需要手动将 render._withStripped 设置为 true
       const handlers = options.render && options.render._withStripped
         ? getHandler

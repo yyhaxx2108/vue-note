@@ -17,7 +17,7 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
-// 缓存$mount
+// 缓存 $mount
 const mount = Vue.prototype.$mount
 // 重写编译相关的$mount
 Vue.prototype.$mount = function (
