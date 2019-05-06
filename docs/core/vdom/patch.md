@@ -891,6 +891,7 @@ export function createPatchFunction (backend) {
           }
           // 如果不是服务端渲染，或者服务端渲染出错，创建一个空节点(虚拟 vnode )替换 oldVnode
           // oldVnode 上 elm 是传入的 oldVnode
+          // 将真实 dom 转化为 vnode
           oldVnode = emptyNodeAt(oldVnode)
         }
 
