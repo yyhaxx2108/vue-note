@@ -48,7 +48,7 @@ const componentVNodeHooks = {
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
       // 调用 createComponentInstanceForVnode 创建一个实例
-      // activeInstance 为当前正在渲染的实例的引用
+      // activeInstance 为当前正在渲染的实例的引用(父组件实例)
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
@@ -109,7 +109,7 @@ const componentVNodeHooks = {
   }
 }
 
-// 该数组的值是 [init, prepatch, insert,destroy]
+// 该数组的值是 [init, prepatch, insert, destroy]
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
 // 创建组件 Vnode
@@ -167,6 +167,7 @@ export function createComponent (
     }
   }
 
+  // 换成 data 
   data = data || {}
 
   // resolve constructor options in case global mixins are applied after
@@ -280,7 +281,7 @@ function installComponentHooks (data: VNodeData) {
 function mergeHook (f1: any, f2: any): Function {
   // 定义mereged 函数，该函数会依次调用 f1、f2
   const merged = (a, b) => {
-    // flow complains about extra args which is why we use any
+    // 合并就是先后调用 f1、f2 函数
     f1(a, b)
     f2(a, b)
   }

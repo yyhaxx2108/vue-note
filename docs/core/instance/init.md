@@ -106,20 +106,20 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 
   // 读取占位节点的 componentOptions，并且保存到 vnodeComponentOptions 上
   const vnodeComponentOptions = parentVnode.componentOptions
-  // 将占位节点上的 propsData 保存到 opts.propsData 上
+  // 将占位节点上的 propsData 保存到 vm.$options.propsData 上
   opts.propsData = vnodeComponentOptions.propsData
-  // 将占位节点上的 listeners 保存到 opts._parentListeners 上
+  // 将占位节点上的 listeners 保存到 vm.$options._parentListeners 上
   opts._parentListeners = vnodeComponentOptions.listeners
-  // 将占位节点上的 children 保存到 opts._renderChildren 上
+  // 将占位节点上的 children 保存到 vm.$options._renderChildren 上
   opts._renderChildren = vnodeComponentOptions.children
-  // 将占位节点上的 tag 保存到 opts._componentTag 上
+  // 将占位节点上的 tag 保存到 vm.$options._componentTag 上
   opts._componentTag = vnodeComponentOptions.tag
 
   // 如果存在 options.render
   if (options.render) {
-    // 将 options.render 赋值给 opts.render
+    // 将 options.render 赋值给 vm.$options.render
     opts.render = options.render
-    // 将 options.staticRenderFns 赋值给 opts.staticRenderFns
+    // 将 options.staticRenderFns 赋值给 vm.$options.staticRenderFns
     opts.staticRenderFns = options.staticRenderFns
   }
 }

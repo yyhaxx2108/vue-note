@@ -6,11 +6,7 @@ import { defineComputed, proxy } from '../instance/state'
 import { extend, mergeOptions, validateComponentName } from '../util/index'
 
 export function initExtend (Vue: GlobalAPI) {
-  /**
-   * Each instance constructor, including Vue, has a unique
-   * cid. This enables us to create wrapped "child
-   * constructors" for prototypal inheritance and cache them.
-   */
+  // 每一个实例的构造器，包括 Vue，都有一个唯一的 cid，这让我们创建一个用户原型继承的子 constructors，并且缓存起来
   Vue.cid = 0
   let cid = 1
 
@@ -73,21 +69,20 @@ export function initExtend (Vue: GlobalAPI) {
     Sub.mixin = Super.mixin
     Sub.use = Super.use
 
-    // create asset registers, so extended classes
-    // can have their private assets too.
+    // 创建一些静态资源注册，这样在子构造函数中也会有这些资源
     ASSET_TYPES.forEach(function (type) {
       Sub[type] = Super[type]
     })
-    // enable recursive self-lookup
+    // 启用递归自查找
     if (name) {
       Sub.options.components[name] = Sub
     }
 
-    // keep a reference to the super options at extension time.
-    // later at instantiation we can check if Super's options have
-    // been updated.
+    // 保存父级 options，在后面的实例化过程中，我们可以检查super的选项是否已更新
     Sub.superOptions = Super.options
+    // 保留自身传入 options
     Sub.extendOptions = extendOptions
+    // 用继承的方式保留自身构造函数的 options
     Sub.sealedOptions = extend({}, Sub.options)
 
     // 换成 Sub
