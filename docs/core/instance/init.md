@@ -99,9 +99,9 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   // 用一个个赋值代替列举赋值来提升性能，这里缓存parentVnode，方便后面使用
   // 将占位节点保存到 parentVnode 上
   const parentVnode = options._parentVnode
-  // 将父亲节点保存到 opts.parent 上
+  // 将父亲节点保存到 vm.$options.parent 上
   opts.parent = options.parent
-  // 将占位节点保存到 opts._parentVnode 上
+  // 将占位节点保存到 vm.$options._parentVnode 上
   opts._parentVnode = parentVnode
 
   // 读取占位节点的 componentOptions，并且保存到 vnodeComponentOptions 上
