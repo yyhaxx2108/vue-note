@@ -48,7 +48,9 @@ export function removeChild (node: Node, child: Node) {
   node.removeChild(child)
 }
 
+// 添加子节点
 export function appendChild (node: Node, child: Node) {
+  // 调用原生 dom 的 appendChild 方法
   node.appendChild(child)
 }
 

@@ -85,7 +85,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (!prevVnode) {
       // 如果不存在，说明是初始化渲染，调用 vm.__patch__ 函数，将其值赋值给 vm.$el
       // 传入的 vm.$el 为 旧的 vnode，即为用于挂载的 dom（真实dom）
-      // vnode 传入的 vnode(虚拟dom)，hydrating 是否为服务端渲染，最后一个参数为 removeOnly
+      // vnode 传入的 vnode(虚拟dom)，hydrating 是否为服务端渲染，最后一个参数为 removeOnly，这是给transition-group 用的
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false)
     } else {
       // 如果存在 prevVnode，说明是更新节点，传入参数为 prevVnode，vnode
@@ -206,7 +206,9 @@ export function mountComponent (
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     // 在非生产环境，对性能进行测试
     updateComponent = () => {
+      // 缓存实例名字
       const name = vm._name
+      // 缓存实例 uid
       const id = vm._uid
       const startTag = `vue-perf-start:${id}`
       const endTag = `vue-perf-end:${id}`

@@ -10,13 +10,14 @@ import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'
 // 有一下两种情况需要重新的规范化：
 // 1.当 children 中包含了 components，因为函数式组件可能返回一个数组，而不是一个根的节点。在这种情况下，只需要简单的nomalize
 // 如果在数组中有任何的 child，我们只需要通过 Array.prototype.concat进行拍平，通过 normalize 后，函数式组件只会返回一个一维数组
-// 这种方法不用递归考虑其子元素的子元素是否为数组
+// 这种方法不用递归考虑其子元素的子元素是否为数组，该方法只能拍平一个二维数组
 export function simpleNormalizeChildren (children: any) {
   // 遍历 children
   for (let i = 0; i < children.length; i++) {
     // 如果其值为数组
     if (Array.isArray(children[i])) {
       // 调用 apply 函数，达到拍平数组的效果
+      // 其中 apply 会将 children 中的每一个元素都当做 concat 的参数，即[].concat(children[0], children[1]...)
       return Array.prototype.concat.apply([], children)
     }
   }

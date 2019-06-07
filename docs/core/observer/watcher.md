@@ -23,6 +23,14 @@ let uid = 0
 // Watcher 作用是对观察的表达式收集依赖，触发回调，在$watch() 和 directives 用到
 // Watcher 的原理是通过对“被观测目标”的求值，触发数据属性的 get 拦截器函数从而收集依赖
 // Watcher 用于求值，Observer 用于将对象转化成 get/set
+// 例如渲染 Watcher 如下：
+//  new Watcher(vm, updateComponent, noop, {
+//     before () {
+//       if (vm._isMounted) {
+//         callHook(vm, 'beforeUpdate')
+//       }
+//     }
+//   }, true)
 export default class Watcher {
   vm: Component;
   expression: string;
