@@ -22,6 +22,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // 给构造函数添加一个只读的config
   const configDef = {}
   configDef.get = () => config
+  // 在非生产环境中，不允许修改 Vue.config
   if (process.env.NODE_ENV !== 'production') {
     configDef.set = () => {
       warn(
@@ -29,6 +30,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
       )
     }
   }
+  // 向 Vue 的 config 上定义一个对象
   Object.defineProperty(Vue, 'config', configDef)
 
   // 在 Vue.util 上暴露出工具方法，尽量不要使用

@@ -15,6 +15,7 @@
     if (process.env.NODE_ENV !== 'production' &&
       !(this instanceof Vue)
     ) {
+      // Vue 必须实例化
       warn('Vue is a constructor and should be called with the `new` keyword')
     }
     this._init(options)
