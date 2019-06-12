@@ -175,6 +175,7 @@ function mergeAssets (
     // 返回合并后的 res，res 自身是 与 options 属性一样，原型上面挂载了父级元素的属性
     return extend(res, childVal)
   } else {
+    // 返回 res
     return res
   }
 }
