@@ -175,7 +175,7 @@ export function defineReactive (
     get: function reactiveGetter () {
       // 如果存在 getter 方法，那么调用 getter 取值，否则用 val 当 value 的值
       const value = getter ? getter.call(obj) : val
-      // 收集依赖，其中 Dep.target 为 要被收集对依赖
+      // 收集依赖，其中 Dep.target 为要被收集对依赖
       if (Dep.target) {
         // 如果存在需要被收集对依赖，执行依赖收集，dep 为当前对象下面对闭包
         // 此依赖触发的时机是当前属性值被修改

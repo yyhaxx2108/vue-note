@@ -48,7 +48,7 @@ function flushSchedulerQueue () {
   // 定义 watcher, id
   let watcher, id
 
-  // 对 queue 进行排序
+  // 对 queue 进行从小到大排序
   // 1. 组件更新是从父到子，因为父元素总是在子元素之前创建
   // 2. 一个组件到自定义 watchers 要比他的渲染 watcher 先执行，因为用户 watcher 比渲染 watcher 先渲染
   // 3. 如果在父组件回调执行期间，子组件被销毁，子组件的 watcher 将被跳过
